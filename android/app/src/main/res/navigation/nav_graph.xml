@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <!-- Ekran 1: Logowanie -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.przevolut.ui.login.LoginFragment"
+        android:label="Logowanie"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Ekran 2: Dashboard -->
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.przevolut.ui.dashboard.DashboardFragment"
+        android:label="Kursy Walut"
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_scanner"
+            app:destination="@id/scannerFragment" />
+    </fragment>
+
+    <!-- Ekran 3: Skaner AR -->
+    <fragment
+        android:id="@+id/scannerFragment"
+        android:name="com.przevolut.ui.scanner.ScannerFragment"
+        android:label="Skaner AR"
+        tools:layout="@layout/fragment_scanner" />
+
+    <!-- Ekran 4: Alerty -->
+    <fragment
+        android:id="@+id/alertsFragment"
+        android:name="com.przevolut.ui.alerts.AlertsFragment"
+        android:label="Alerty"
+        tools:layout="@layout/fragment_alerts" />
+
+    <!-- Ekran 5: Ustawienia -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.przevolut.ui.settings.SettingsFragment"
+        android:label="Ustawienia"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>

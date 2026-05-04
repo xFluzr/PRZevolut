@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PRZevolut</string>
+
+    <!-- Login -->
+    <string name="login_title">Zaloguj się</string>
+    <string name="hint_email">Adres e-mail</string>
+    <string name="hint_password">Hasło</string>
+    <string name="btn_login">Zaloguj</string>
+    <string name="btn_register">Nie masz konta? Zarejestruj się</string>
+    <string name="btn_biometric">Zaloguj odciskiem palca</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Kursy Walut</string>
+    <string name="offline_banner">📴 Tryb offline</string>
+    <string name="last_updated">Ostatnia aktualizacja:</string>
+    <string name="error_no_internet">Brak połączenia z internetem</string>
+
+    <!-- Scanner -->
+    <string name="scanner_title">Skaner AR</string>
+    <string name="scanner_permission_message">Uprawnienie do kamery jest wymagane do skanowania cen.</string>
+    <string name="btn_manual_input">Wpisz kwotę ręcznie</string>
+    <string name="scanning">Skanowanie...</string>
+
+    <!-- Alerts -->
+    <string name="alerts_title">Alerty Walutowe</string>
+    <string name="fab_add_alert">Dodaj alert</string>
+    <string name="no_alerts">Brak alertów. Dodaj swój pierwszy alert!</string>
+    <string name="btn_delete">Usuń</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ustawienia</string>
+    <string name="default_currency_label">Domyślna waluta skanera</string>
+    <string name="biometric_label">Logowanie biometryczne</string>
+    <string name="btn_logout">Wyloguj się</string>
+    <string name="about_app">O aplikacji</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Kursy</string>
+    <string name="nav_scanner">Skaner</string>
+    <string name="nav_alerts">Alerty</string>
+    <string name="nav_settings">Ustawienia</string>
+
+    <!-- Currency names -->
+    <string name="currency_eur">Euro</string>
+    <string name="currency_usd">Dolar Amerykański</string>
+    <string name="currency_gbp">Funt Brytyjski</string>
+    <string name="currency_chf">Frank Szwajcarski</string>
+    <string name="currency_czk">Korona Czeska</string>
+</resources>

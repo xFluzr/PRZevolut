@@ -1,0 +1,46 @@
+PRZevolut – AR Currency Scanner
+
+Short description (80 chars):
+Scan prices abroad & convert them to PLN in real time – just point your camera!
+
+---
+
+Full description:
+
+Not sure how much that jacket really costs in Berlin? Or that bottle of wine in Barcelona?
+
+PRZevolut is your smart AR currency converter. Just point your phone's camera at any price tag – the app instantly reads the amount and overlays the conversion to Polish Złoty right on your screen.
+
+✨ KEY FEATURES:
+
+📷 AR Price Scanner
+Point your camera at any price label. Our OCR technology reads the amount and you see an instant PLN conversion overlaid on screen. Supported currencies: EUR, USD, GBP, CHF, CZK.
+
+💱 Live NBP Exchange Rates
+Rates pulled directly from the National Bank of Poland (NBP), updated automatically throughout the day. Always accurate, always reliable.
+
+✈️ Works Offline
+Traveling abroad without data? No problem – the app stores the latest rates locally and works without an internet connection.
+
+🔔 Currency Rate Alerts
+Set a target rate for EUR or USD and get notified the moment it hits your level. Perfect for planning currency exchanges.
+
+🔐 Secure Account
+Log in with your password or fingerprint. Your alerts sync across devices.
+
+📊 Conversion History
+Revisit amounts you scanned earlier – your last 20 conversions are always available.
+
+---
+
+Why does PRZevolut require a smartphone?
+• Camera – for real-time AR price scanning (impossible on a desktop)
+• Offline mode – abroad, internet can be expensive or unavailable; local rate storage ensures the app works without roaming
+• Push notifications – currency alerts need to reach a mobile device the user carries everywhere
+
+---
+
+Privacy:
+• Camera images are NEVER sent to a server – OCR runs fully on-device (Google ML Kit)
+• Passwords are hashed – never stored in plain text
+• No location data collected
