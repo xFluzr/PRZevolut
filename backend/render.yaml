@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: przevolut-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: przevolut-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "15"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "30"
+      - key: NBP_API_URL
+        value: "https://api.nbp.pl/api/exchangerates/tables/A?format=json"
+      - key: RATE_REFRESH_INTERVAL_MINUTES
+        value: "60"
+      - key: CORS_ORIGINS
+        value: '["https://przevolut.app"]'
+      - key: BCRYPT_COST
+        value: "12"
+    healthCheckPath: /health
+
+databases:
+  - name: przevolut-db
+    plan: free
+    databaseName: przevolut

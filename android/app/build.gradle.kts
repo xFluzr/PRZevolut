@@ -17,7 +17,7 @@ val localProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.przevolut.app"
+    namespace = "com.przevolut"
     compileSdk = 34
 
     defaultConfig {
@@ -30,8 +30,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        // BASE_URL pobierany z zasobu api_config.xml (można nadpisać per-flavor)
-        resValue("string", "base_url", localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com"))
+        buildConfigField("String", "BASE_URL", "\"${localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com")}\"")
     }
 
     signingConfigs {
@@ -71,6 +70,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
 
     packaging {
@@ -92,6 +92,7 @@ dependencies {
 
     // Lifecycle
     implementation(libs.bundles.lifecycle)
+    implementation(libs.androidx.swiperefreshlayout)
 
     // Navigation
     implementation(libs.navigation.compose)

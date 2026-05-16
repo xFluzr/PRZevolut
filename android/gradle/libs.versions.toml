@@ -19,6 +19,8 @@ mlkit-text = "16.0.0"
 datastore = "1.1.1"
 workmanager = "2.9.0"
 biometric = "1.1.0"
+swiperefreshlayout = "1.1.0"
+gson = "2.10.1"
 firebase-bom = "34.13.0"
 hilt-navigation-compose = "1.2.0"
 accompanist = "0.34.0"
@@ -98,6 +100,13 @@ workmanager-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.
 # Biometric
 biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 
+# SwipeRefreshLayout
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+
+# Gson
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+
 # Firebase
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
@@ -124,7 +133,7 @@ google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 [bundles]
 compose = ["compose-ui", "compose-ui-graphics", "compose-ui-tooling-preview", "compose-material3", "compose-icons-extended"]
 camerax = ["camerax-core", "camerax-camera2", "camerax-lifecycle", "camerax-view"]
-retrofit = ["retrofit", "retrofit-kotlinx-serialization", "okhttp", "okhttp-logging"]
+retrofit = ["retrofit", "retrofit-gson", "retrofit-kotlinx-serialization", "okhttp", "okhttp-logging"]
 room = ["room-runtime", "room-ktx"]
 lifecycle = ["lifecycle-runtime-ktx", "lifecycle-viewmodel-compose", "lifecycle-runtime-compose"]
 testing = ["junit", "mockk", "coroutines-test", "turbine"]

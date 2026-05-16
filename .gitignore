@@ -20,6 +20,7 @@ local.properties
 captures/
 .externalNativeBuild/
 .cxx/
+google-services.json
 
 # Python / Backend
 __pycache__/
@@ -30,4 +31,3 @@ env/
 .venv/
 .env
 firebase-credentials.json
-alembic.ini
