@@ -1,27 +1,43 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
 
-# Ustaw katalog roboczy
+# ─── Stage 1: Builder ────────────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
+
 WORKDIR /app
 
-# Zainstaluj zależności systemowe
-RUN apt-get update && apt-get install -y \
-    gcc \
+# Instalacja zależności systemowych potrzebnych do kompilacji
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Kopiuj i zainstaluj zależności Pythona
+# Kopiowanie pliku requirements i instalacja w wirtualnym środowisku
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Kopiuj kod aplikacji
+# ─── Stage 2: Production ─────────────────────────────────────────────────────
+FROM python:3.12-slim AS production
+
+WORKDIR /app
+
+# Kopiowanie zainstalowanych pakietów z buildera
+COPY --from=builder /install /usr/local
+
+# Kopiowanie kodu aplikacji
 COPY . .
 
-# Utwórz niepriwilegowanego użytkownika
-RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
+# Użytkownik nie-root (bezpieczeństwo)
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
 USER appuser
 
-# Ekspozycja portu
+# Zmienne środowiskowe
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
+
 EXPOSE 8000
 
-# Start aplikacji
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Uruchomienie serwera Uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

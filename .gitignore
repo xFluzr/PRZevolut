@@ -1,76 +1,33 @@
-# =====================
-# Android / Kotlin
-# =====================
-*.iml
-.gradle/
-/local.properties
-/.idea/
+# Powszechne
+.idea/
+.vscode/
 .DS_Store
-/build/
-/captures
-.externalNativeBuild
-.cxx
-android/local.properties
-android/.gradle/
-android/app/build/
-android/build/
-android/**/*.apk
-android/**/*.aab
-android/**/*.keystore
-!android/debug.keystore
-*.orig
+*.log
+*.zip
 
-# =====================
+# Android
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
 # Python / Backend
-# =====================
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-backend/.venv/
-backend/venv/
-backend/env/
-backend/ENV/
-backend/.env
-!backend/.env.example
-backend/*.egg-info/
-backend/dist/
-backend/htmlcov/
-backend/.tox/
-backend/.pytest_cache/
-backend/.mypy_cache/
-*.db
-*.sqlite3
-
-# =====================
-# IDE / Editors
-# =====================
-.idea/
-*.iws
-*.ipr
-.vscode/
-*.swp
-*.swo
-*~
-.project
-.classpath
-.settings/
-*.sublime-workspace
-
-# =====================
-# OS
-# =====================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# =====================
-# CI / Docker
-# =====================
-*.log
-docker-compose.override.yml
+venv/
+env/
+.venv/
+.env
+firebase-credentials.json
+alembic.ini

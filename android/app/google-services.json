@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1016350139403",
+    "project_id": "przevolut",
+    "storage_bucket": "przevolut.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1016350139403:android:9f1984850c78e0bbf5130e",
+        "android_client_info": {
+          "package_name": "com.przevolut.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFEEG4Ym4JiW3qUiqbxvg9kQ7TeVRIy-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

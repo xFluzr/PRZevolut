@@ -1,1 +1,1 @@
-"""Empty init file."""
+"""Backend package — PRZevolut."""

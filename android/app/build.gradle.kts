@@ -1,49 +1,62 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
+}
+
+// Odczyt keystore z local.properties (placeholdery — nie commituj prawdziwych wartości)
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) load(file.inputStream())
 }
 
 android {
-    namespace = "com.przevolut"
+    namespace = "com.przevolut.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.przevolut.scanner"
+        applicationId = "com.przevolut.app"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
 
-        // Backend URL — nadpisz w lokalnym gradle.properties lub CI secret
-        buildConfigField(
-            "String", "BASE_URL",
-            "\"https://przevolut-api.onrender.com/\""
-        )
+        // BASE_URL pobierany z zasobu api_config.xml (można nadpisać per-flavor)
+        resValue("string", "base_url", localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com"))
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = localProperties.getProperty("KEYSTORE_PATH")?.let { file(it) }
+            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD", "placeholder")
+            keyAlias = localProperties.getProperty("KEY_ALIAS", "placeholder")
+            keyPassword = localProperties.getProperty("KEY_PASSWORD", "placeholder")
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
-            buildConfigField(
-                "String", "BASE_URL",
-                "\"http://10.0.2.2:8000/\""  // localhost dla emulatora
-            )
+            isMinifyEnabled = false
+            versionNameSuffix = "-debug"
         }
-    }
-
-    buildFeatures {
-        viewBinding = true
-        buildConfig = true
     }
 
     compileOptions {
@@ -54,57 +67,80 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
-    // Core
+    // Compose BOM
+    implementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.google.material)
+    debugImplementation(libs.compose.ui.tooling)
 
-    // Lifecycle / ViewModel / LiveData
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // Lifecycle
+    implementation(libs.bundles.lifecycle)
 
-    // Navigation Component
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
+    // Navigation
+    implementation(libs.navigation.compose)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
 
-    // Room (local DB — offline cache kursów walut)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
-    // Hilt (Dependency Injection)
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
-    // Retrofit + OkHttp (API client)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp.logging)
+    // Room
+    implementation(libs.bundles.room)
+    ksp(libs.room.compiler)
 
-    // CameraX (skaner AR)
-    implementation(libs.camerax.core)
-    implementation(libs.camerax.camera2)
-    implementation(libs.camerax.lifecycle)
-    implementation(libs.camerax.view)
+    // Retrofit + OkHttp
+    implementation(libs.bundles.retrofit)
+    implementation(libs.kotlinx.serialization.json)
 
-    // ML Kit — OCR
+    // Coroutines
+    implementation(libs.coroutines.android)
+
+    // CameraX
+    implementation(libs.bundles.camerax)
+
+    // ML Kit
     implementation(libs.mlkit.text.recognition)
 
+    // DataStore
+    implementation(libs.datastore.preferences)
+
+    // WorkManager
+    implementation(libs.workmanager.ktx)
+
     // Biometric
-    implementation(libs.androidx.biometric)
+    implementation(libs.biometric)
 
-    // Unit Tests
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.androidx.core.testing)
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
 
-    // Instrumented Tests
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    // Testing
+    testImplementation(libs.bundles.testing)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
