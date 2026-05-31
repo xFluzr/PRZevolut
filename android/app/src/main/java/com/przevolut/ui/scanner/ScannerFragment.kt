@@ -7,8 +7,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -39,6 +41,10 @@ class ScannerFragment : Fragment() {
     private lateinit var cameraExecutor: ExecutorService
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
+    // Throttle: przetwarzamy OCR max co 500ms żeby nie zalewać ViewModelu
+    private var lastOcrTimestamp = 0L
+    private val OCR_THROTTLE_MS = 500L
+
     // ── Uprawnienia do aparatu ────────────────────────────────────────────
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -47,8 +53,11 @@ class ScannerFragment : Fragment() {
         if (isGranted) {
             startCamera()
         } else {
-            Toast.makeText(requireContext(),
-                "Uprawnienie do kamery jest wymagane do skanowania cen.", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "Uprawnienie do kamery jest wymagane do skanowania cen.",
+                Toast.LENGTH_LONG
+            ).show()
             binding.tvPermissionMessage.visibility = View.VISIBLE
             binding.previewView.visibility = View.GONE
         }
@@ -69,7 +78,7 @@ class ScannerFragment : Fragment() {
         observeViewModel()
 
         binding.btnManualInput.setOnClickListener {
-            // TODO: Pokaż dialog ręcznego wpisania kwoty
+            showManualInputDialog()
         }
     }
 
@@ -79,8 +88,11 @@ class ScannerFragment : Fragment() {
                     == PackageManager.PERMISSION_GRANTED -> startCamera()
 
             shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
-                Toast.makeText(requireContext(),
-                    "Aplikacja potrzebuje dostępu do kamery, aby skanować ceny.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Aplikacja potrzebuje dostępu do kamery, aby skanować ceny.",
+                    Toast.LENGTH_LONG
+                ).show()
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
 
@@ -105,7 +117,13 @@ class ScannerFragment : Fragment() {
                 .build()
                 .also { analysis ->
                     analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                        processImageForOcr(imageProxy)
+                        val now = System.currentTimeMillis()
+                        if (now - lastOcrTimestamp >= OCR_THROTTLE_MS) {
+                            lastOcrTimestamp = now
+                            processImageForOcr(imageProxy)
+                        } else {
+                            imageProxy.close()
+                        }
                     }
                 }
 
@@ -117,6 +135,7 @@ class ScannerFragment : Fragment() {
                     preview,
                     imageAnalyzer
                 )
+                Log.d("ScannerFragment", "Kamera uruchomiona pomyślnie.")
             } catch (e: Exception) {
                 Log.e("ScannerFragment", "Błąd uruchamiania kamery: ${e.message}", e)
             }
@@ -134,7 +153,11 @@ class ScannerFragment : Fragment() {
         val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
         textRecognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
-                viewModel.processOcrResult(visionText.text)
+                val raw = visionText.text
+                if (raw.isNotBlank()) {
+                    Log.d("ScannerOCR", "Wykryty tekst: $raw")
+                    viewModel.processOcrResult(raw)
+                }
             }
             .addOnFailureListener { e ->
                 Log.e("ScannerFragment", "OCR error: ${e.message}")
@@ -151,15 +174,49 @@ class ScannerFragment : Fragment() {
                     if (it.convertedAmountPln != null && it.detectedCurrency != null) {
                         binding.tvOverlayResult.visibility = View.VISIBLE
                         binding.tvOverlayResult.text =
-                            "${it.detectedAmount} ${it.detectedCurrency} = %.2f PLN".format(it.convertedAmountPln)
+                            "%.2f %s = %.2f PLN".format(
+                                it.detectedAmount,
+                                it.detectedCurrency,
+                                it.convertedAmountPln
+                            )
                         binding.tvRateInfo.text =
-                            "Kurs: 1 ${it.detectedCurrency} = ${it.usedRate} PLN"
+                            "Kurs: 1 ${it.detectedCurrency} = %.4f PLN".format(it.usedRate ?: 0.0)
                     } else {
                         binding.tvOverlayResult.visibility = View.GONE
+                        binding.tvRateInfo.text = ""
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Dialog ręcznego wpisania kwoty i waluty.
+     * Przydatny gdy OCR nie może odczytać ceny (słabe oświetlenie, niestandardowa czcionka).
+     */
+    private fun showManualInputDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(android.R.layout.simple_list_item_2, null)
+
+        val input = EditText(requireContext()).apply {
+            hint = "np. 49.99 EUR lub €12,50"
+            textSize = 16f
+            setPadding(48, 32, 48, 16)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Wpisz kwotę ręcznie")
+            .setView(input)
+            .setPositiveButton("Przelicz") { _, _ ->
+                val text = input.text.toString().trim()
+                if (text.isNotEmpty()) {
+                    viewModel.processOcrResult(text)
+                } else {
+                    Toast.makeText(requireContext(), "Wpisz kwotę", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Anuluj", null)
+            .show()
     }
 
     override fun onDestroyView() {

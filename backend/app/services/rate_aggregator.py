@@ -1,6 +1,7 @@
 """Agregator kursów — APScheduler co 60 minut pobiera i zapisuje snapshot NBP."""
 
 import logging
+from datetime import datetime, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -60,6 +61,7 @@ def start_scheduler(interval_minutes: int = 60) -> None:
         id="nbp_aggregator",
         replace_existing=True,
         max_instances=1,
+        next_run_time=datetime.now(timezone.utc),  # Pierwsze wykonanie natychmiast przy starcie
     )
     _scheduler.start()
     logger.info("Scheduler NBP uruchomiony — interwał: %d min.", interval_minutes)

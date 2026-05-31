@@ -5,6 +5,7 @@ import com.przevolut.data.remote.model.AlertResponse
 import com.przevolut.data.remote.model.LoginRequest
 import com.przevolut.data.remote.model.LoginResponse
 import com.przevolut.data.remote.model.RateResponse
+import com.przevolut.data.remote.model.RatesResponse
 import com.przevolut.data.remote.model.RegisterRequest
 import com.przevolut.data.remote.model.RegisterResponse
 import retrofit2.Response
@@ -26,7 +27,7 @@ interface ApiService {
     // ── Rates ─────────────────────────────────────────────────────────────
 
     @GET("rates")
-    suspend fun getRates(): Response<List<RateResponse>>
+    suspend fun getRates(): Response<RatesResponse>
 
     @GET("rates/{currency}")
     suspend fun getRate(@Path("currency") currency: String): Response<RateResponse>

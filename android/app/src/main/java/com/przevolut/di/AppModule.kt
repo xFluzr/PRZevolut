@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import com.przevolut.BuildConfig
 import com.przevolut.data.local.AppDatabase
+import com.przevolut.data.local.TokenManager
 import com.przevolut.data.local.dao.RateDao
 import com.przevolut.data.remote.ApiService
+import com.przevolut.data.remote.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,7 +49,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideTokenManager(@ApplicationContext context: Context): TokenManager =
+        TokenManager(context)
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -56,6 +63,7 @@ object AppModule {
             }
         }
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(logging)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

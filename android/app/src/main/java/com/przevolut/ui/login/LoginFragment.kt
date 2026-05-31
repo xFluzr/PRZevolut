@@ -76,6 +76,7 @@ class LoginFragment : Fragment() {
                     }
                     is LoginUiState.Success -> {
                         binding.progressBar.visibility = View.GONE
+                        viewModel.resetState()
                         findNavController().navigate(R.id.action_loginFragment_to_dashboardFragment)
                     }
                     is LoginUiState.Error -> {

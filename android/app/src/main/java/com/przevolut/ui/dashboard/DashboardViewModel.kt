@@ -56,13 +56,13 @@ class DashboardViewModel @Inject constructor(
             try {
                 val response = apiService.getRates()
                 if (response.isSuccessful) {
-                    val remoteRates = response.body() ?: return@launch
+                    val remoteRates = response.body()?.rates ?: return@launch
                     val now = System.currentTimeMillis()
                     val entities = remoteRates.map { r ->
                         RateEntity(
                             currency = r.currency,
-                            rate = r.mid,
-                            mid = r.mid,
+                            rate = r.mid ?: r.rate ?: 0.0,
+                            mid = r.mid ?: r.rate ?: 0.0,
                             effectiveDate = r.effectiveDate ?: "",
                             fetchedAt = now
                         )

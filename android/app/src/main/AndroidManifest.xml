@@ -48,6 +48,11 @@
             </intent-filter>
         </activity>
 
+        <!-- Domyślny kanał powiadomień FCM -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="przevolut_main" />
+
         <!-- Firebase Cloud Messaging Service -->
         <service
             android:name=".fcm.PRZevolutMessagingService"

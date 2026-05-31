@@ -2,6 +2,7 @@ package com.przevolut.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.przevolut.data.local.TokenManager
 import com.przevolut.data.remote.ApiService
 import com.przevolut.data.remote.model.LoginRequest
 import com.przevolut.data.remote.model.RegisterRequest
@@ -20,14 +21,12 @@ sealed class LoginUiState {
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState: StateFlow<LoginUiState> = _uiState
-
-    // W prawdziwej aplikacji token jest zapisywany w EncryptedSharedPreferences
-    private var savedToken: String? = null
 
     fun login(email: String, password: String) {
         _uiState.value = LoginUiState.Loading
@@ -36,7 +35,7 @@ class LoginViewModel @Inject constructor(
                 val response = apiService.login(LoginRequest(email, password))
                 if (response.isSuccessful) {
                     val token = response.body()?.accessToken ?: ""
-                    savedToken = token
+                    tokenManager.saveToken(token)
                     _uiState.value = LoginUiState.Success(token)
                 } else {
                     _uiState.value = LoginUiState.Error("Nieprawidłowy e-mail lub hasło.")
@@ -53,7 +52,6 @@ class LoginViewModel @Inject constructor(
             try {
                 val response = apiService.register(RegisterRequest(email, password))
                 if (response.isSuccessful) {
-                    // Po rejestracji automatycznie logujemy
                     login(email, password)
                 } else {
                     _uiState.value = LoginUiState.Error("Rejestracja nie powiodła się. E-mail może już być zajęty.")
@@ -65,11 +63,15 @@ class LoginViewModel @Inject constructor(
     }
 
     fun loginWithBiometric() {
-        // W produkcji: pobierz zapisany token z EncryptedSharedPreferences
-        savedToken?.let {
-            _uiState.value = LoginUiState.Success(it)
-        } ?: run {
+        val token = tokenManager.getToken()
+        if (token != null) {
+            _uiState.value = LoginUiState.Success(token)
+        } else {
             _uiState.value = LoginUiState.Error("Brak zapisanych danych logowania. Zaloguj się hasłem.")
         }
+    }
+
+    fun resetState() {
+        _uiState.value = LoginUiState.Idle
     }
 }

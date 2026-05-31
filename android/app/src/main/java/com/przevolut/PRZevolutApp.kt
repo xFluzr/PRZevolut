@@ -1,11 +1,17 @@
 package com.przevolut
 
 import android.app.Application
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 
-/**
- * Klasa aplikacji — wymagana przez Hilt do Dependency Injection.
- * Zarejestrowana w AndroidManifest.xml jako android:name=".PRZevolutApp"
- */
 @HiltAndroidApp
-class PRZevolutApp : Application()
+class PRZevolutApp : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            Log.d("FCM_TOKEN", "Token: $token")
+        }
+    }
+}

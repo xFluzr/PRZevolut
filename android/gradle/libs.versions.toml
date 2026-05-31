@@ -30,6 +30,7 @@ espresso = "3.5.1"
 mockk = "1.13.10"
 turbine = "1.1.0"
 kotlinx-serialization-json = "1.6.3"
+androidx-arch-core = "2.2.0"
 
 [libraries]
 # AndroidX Core
@@ -120,6 +121,7 @@ compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "androidx-arch-core" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -136,4 +138,4 @@ camerax = ["camerax-core", "camerax-camera2", "camerax-lifecycle", "camerax-view
 retrofit = ["retrofit", "retrofit-gson", "retrofit-kotlinx-serialization", "okhttp", "okhttp-logging"]
 room = ["room-runtime", "room-ktx"]
 lifecycle = ["lifecycle-runtime-ktx", "lifecycle-viewmodel-compose", "lifecycle-runtime-compose"]
-testing = ["junit", "mockk", "coroutines-test", "turbine"]
+testing = ["junit", "mockk", "coroutines-test", "turbine", "androidx-arch-core-testing"]

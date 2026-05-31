@@ -29,14 +29,20 @@ data class LoginResponse(
 
 // ── Rates ─────────────────────────────────────────────────────────────────
 
+data class RatesResponse(
+    @SerializedName("fetched_at") val fetchedAt: String,
+    val base: String,
+    val rates: List<RateResponse>
+)
+
 data class RateResponse(
-    val currency: String,
-    val rate: Double,
-    val mid: Double,
+    @SerializedName("code") val currency: String,
+    val name: String?,
+    val rate: Double?,
+    val mid: Double?,
     val bid: Double?,
     val ask: Double?,
-    @SerializedName("effective_date") val effectiveDate: String?,
-    @SerializedName("fetched_at") val fetchedAt: String
+    @SerializedName("effective_date") val effectiveDate: String?
 )
 
 // ── Alerts ────────────────────────────────────────────────────────────────

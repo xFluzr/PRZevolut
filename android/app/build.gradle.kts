@@ -30,7 +30,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        buildConfigField("String", "BASE_URL", "\"${localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com")}\"")
+        val baseUrl = localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com").trim('"')
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     signingConfigs {
