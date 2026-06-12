@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_md">
+
+    <TextView
+        android:id="@+id/label_currency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_currency_label"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorOnSurface" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_currency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_marginBottom="@dimen/spacing_md"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_eur"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="EUR" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_usd"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="USD" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_gbp"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="GBP" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_chf"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="CHF" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_czk"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="CZK" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/label_direction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_direction_label"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorOnSurface" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggle_direction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_marginBottom="@dimen/spacing_md"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_above"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_weight="1"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/dialog_direction_above"
+            app:icon="@drawable/ic_arrow_upward" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_below"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_weight="1"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/dialog_direction_below"
+            app:icon="@drawable/ic_arrow_downward" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_threshold"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/dialog_threshold_label">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_threshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:minHeight="@dimen/touch_target_min" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

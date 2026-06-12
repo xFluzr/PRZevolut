@@ -138,6 +138,9 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.analytics)
 
+    // Charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
     // Testing
     testImplementation(libs.bundles.testing)
     androidTestImplementation(libs.androidx.test.junit)

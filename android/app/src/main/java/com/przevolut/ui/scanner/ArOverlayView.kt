@@ -3,19 +3,17 @@ package com.przevolut.ui.scanner
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import android.os.Build
+import android.provider.Settings
 import android.util.AttributeSet
 import android.view.View
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.view.animation.DecelerateInterpolator
+import androidx.core.content.ContextCompat
+import com.przevolut.R
 import com.przevolut.domain.model.DetectedPrice
 
-/**
- * Custom View rysujący nakładkę AR na podgląd kamery.
- *
- * Dla każdej wykrytej ceny rysuje:
- * 1. Animowaną ramkę z narożnikami wokół oryginalnej ceny
- * 2. Etykietę z przeliczoną wartością w PLN nad ceną
- * 3. Trójkątną strzałkę łączącą etykietę z ceną
- */
 class ArOverlayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -24,11 +22,11 @@ class ArOverlayView @JvmOverloads constructor(
 
     private var detectedPrices: List<DetectedPrice> = emptyList()
     private var conversionRates: Map<String, Double> = emptyMap()
+    private var accessibilitySummary: String = ""
 
-    // Animacja pulsowania
     private var pulseAlpha = 1.0f
-    private val pulseAnimator = ValueAnimator.ofFloat(0.6f, 1.0f).apply {
-        duration = 800
+    private val pulseAnimator = ValueAnimator.ofFloat(0.4f, 1.0f).apply {
+        duration = 1500
         repeatMode = ValueAnimator.REVERSE
         repeatCount = ValueAnimator.INFINITE
         interpolator = DecelerateInterpolator()
@@ -41,64 +39,79 @@ class ArOverlayView @JvmOverloads constructor(
     private val density = resources.displayMetrics.density
     private val scaledDensity = resources.displayMetrics.scaledDensity
 
-    // Paint objects
+    private val reticleColor = ContextCompat.getColor(context, R.color.scanner_reticle)
+    private val labelBgColor = ContextCompat.getColor(context, R.color.overlay_background)
+
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E676")
+        color = reticleColor
         style = Paint.Style.STROKE
         strokeWidth = 3f * density
     }
 
     private val cornerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E676")
+        color = reticleColor
         style = Paint.Style.STROKE
         strokeWidth = 4f * density
         strokeCap = Paint.Cap.ROUND
     }
 
     private val labelBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#E6004D40")
+        color = labelBgColor
         style = Paint.Style.FILL
     }
 
     private val labelBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E676")
+        color = reticleColor
         style = Paint.Style.STROKE
         strokeWidth = 2f * density
     }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+        color = ContextCompat.getColor(context, R.color.overlay_text)
         textSize = 18f * scaledDensity
         textAlign = Paint.Align.CENTER
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
 
     private val smallTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(200, 255, 255, 255)
+        color = ContextCompat.getColor(context, R.color.overlay_text)
+        alpha = 200
         textSize = 13f * scaledDensity
         textAlign = Paint.Align.CENTER
     }
 
     private val arrowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E676")
+        color = reticleColor
         style = Paint.Style.FILL
     }
 
     init {
-        setLayerType(LAYER_TYPE_HARDWARE, null)
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            setLayerType(LAYER_TYPE_HARDWARE, null)
+        }
     }
 
     fun updatePrices(prices: List<DetectedPrice>, rates: Map<String, Double>) {
         detectedPrices = prices
         conversionRates = rates
 
-        if (prices.isNotEmpty() && !pulseAnimator.isRunning) {
+        accessibilitySummary = prices.mapNotNull { dp ->
+            val rate = rates[dp.currency] ?: return@mapNotNull null
+            val converted = dp.amount * rate
+            "${dp.originalText}: ${"%.2f".format(converted)} PLN"
+        }.joinToString(", ")
+
+        if (prices.isNotEmpty() && shouldAnimate() && !pulseAnimator.isRunning) {
             pulseAnimator.start()
         } else if (prices.isEmpty() && pulseAnimator.isRunning) {
             pulseAnimator.cancel()
         }
 
         invalidate()
+        if (accessibilitySummary.isNotBlank()) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -108,7 +121,6 @@ class ArOverlayView @JvmOverloads constructor(
             val rate = conversionRates[dp.currency] ?: continue
             val converted = dp.amount * rate
 
-            // Przelicz koordynaty obraz → widok
             val scaleX = width.toFloat() / dp.imageWidth
             val scaleY = height.toFloat() / dp.imageHeight
 
@@ -119,7 +131,6 @@ class ArOverlayView @JvmOverloads constructor(
             val boxW = right - left
             val boxH = bottom - top
 
-            // 1. Ramka pulsująca
             borderPaint.alpha = (pulseAlpha * 255).toInt()
             val rectF = RectF(
                 left - 4 * density, top - 4 * density,
@@ -127,7 +138,6 @@ class ArOverlayView @JvmOverloads constructor(
             )
             canvas.drawRoundRect(rectF, 8 * density, 8 * density, borderPaint)
 
-            // 2. Narożniki AR
             val cornerLen = 20 * density
             cornerPaint.alpha = (pulseAlpha * 255).toInt()
             drawArCorners(
@@ -137,7 +147,6 @@ class ArOverlayView @JvmOverloads constructor(
                 cornerLen
             )
 
-            // 3. Etykieta z przeliczoną ceną
             val labelText = String.format("%.2f PLN", converted)
             val labelPadding = 14 * density
             val labelHeight = 42 * density
@@ -147,7 +156,6 @@ class ArOverlayView @JvmOverloads constructor(
             val labelLeft = left + (boxW - labelWidth) / 2
             val labelTop = top - labelHeight - 16 * density
 
-            // Tło
             val labelRect = RectF(
                 labelLeft, labelTop,
                 labelLeft + labelWidth, labelTop + labelHeight
@@ -155,7 +163,6 @@ class ArOverlayView @JvmOverloads constructor(
             canvas.drawRoundRect(labelRect, 8 * density, 8 * density, labelBgPaint)
             canvas.drawRoundRect(labelRect, 8 * density, 8 * density, labelBorderPaint)
 
-            // Strzałka (trójkąt)
             val arrowPath = Path().apply {
                 val cx = left + boxW / 2
                 moveTo(cx - 6 * density, labelTop + labelHeight)
@@ -165,7 +172,6 @@ class ArOverlayView @JvmOverloads constructor(
             }
             canvas.drawPath(arrowPath, arrowPaint)
 
-            // Tekst przeliczonej ceny
             canvas.drawText(
                 labelText,
                 labelLeft + labelWidth / 2,
@@ -173,7 +179,6 @@ class ArOverlayView @JvmOverloads constructor(
                 textPaint
             )
 
-            // 4. Oznaczenie oryginalnej ceny pod ramką
             canvas.drawText(
                 dp.originalText,
                 left + boxW / 2,
@@ -187,18 +192,38 @@ class ArOverlayView @JvmOverloads constructor(
         canvas: Canvas, x: Float, y: Float,
         w: Float, h: Float, len: Float
     ) {
-        // Top-left
         canvas.drawLine(x, y + len, x, y, cornerPaint)
         canvas.drawLine(x, y, x + len, y, cornerPaint)
-        // Top-right
         canvas.drawLine(x + w - len, y, x + w, y, cornerPaint)
         canvas.drawLine(x + w, y, x + w, y + len, cornerPaint)
-        // Bottom-left
         canvas.drawLine(x, y + h - len, x, y + h, cornerPaint)
         canvas.drawLine(x, y + h, x + len, y + h, cornerPaint)
-        // Bottom-right
         canvas.drawLine(x + w - len, y + h, x + w, y + h, cornerPaint)
         canvas.drawLine(x + w, y + h, x + w, y + h - len, cornerPaint)
+    }
+
+    override fun onPopulateAccessibilityEvent(event: AccessibilityEvent) {
+        super.onPopulateAccessibilityEvent(event)
+        if (accessibilitySummary.isNotBlank()) {
+            event.contentDescription = accessibilitySummary
+        }
+    }
+
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        info.contentDescription = accessibilitySummary.ifBlank {
+            "Nakładka skanera AR"
+        }
+        info.className = ArOverlayView::class.java.name
+    }
+
+    private fun shouldAnimate(): Boolean {
+        val scale = Settings.Global.getFloat(
+            context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f
+        )
+        return scale > 0f
     }
 
     override fun onDetachedFromWindow() {

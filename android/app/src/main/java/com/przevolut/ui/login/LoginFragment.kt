@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
@@ -13,15 +12,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.przevolut.R
 import com.przevolut.databinding.FragmentLoginBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Ekran 1/5 — Logowanie.
- * Obsługuje: logowanie e-mail+hasło, rejestrację, logowanie biometryczne.
- */
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
 
@@ -38,7 +34,6 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupClickListeners()
         observeViewModel()
         setupBiometricIfAvailable()
@@ -61,9 +56,7 @@ class LoginFragment : Fragment() {
             }
         }
 
-        binding.btnBiometric.setOnClickListener {
-            showBiometricPrompt()
-        }
+        binding.btnBiometric.setOnClickListener { showBiometricPrompt() }
     }
 
     private fun observeViewModel() {
@@ -71,21 +64,22 @@ class LoginFragment : Fragment() {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is LoginUiState.Loading -> {
-                        binding.progressBar.visibility = View.VISIBLE
+                        binding.progressIndicator.visibility = View.VISIBLE
                         binding.btnLogin.isEnabled = false
                     }
                     is LoginUiState.Success -> {
-                        binding.progressBar.visibility = View.GONE
+                        binding.progressIndicator.visibility = View.GONE
                         viewModel.resetState()
                         findNavController().navigate(R.id.action_loginFragment_to_dashboardFragment)
                     }
                     is LoginUiState.Error -> {
-                        binding.progressBar.visibility = View.GONE
+                        binding.progressIndicator.visibility = View.GONE
                         binding.btnLogin.isEnabled = true
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                        binding.root.announceForAccessibility(state.message)
                     }
                     is LoginUiState.Idle -> {
-                        binding.progressBar.visibility = View.GONE
+                        binding.progressIndicator.visibility = View.GONE
                         binding.btnLogin.isEnabled = true
                     }
                 }
@@ -95,13 +89,17 @@ class LoginFragment : Fragment() {
 
     private fun validateInput(email: String, password: String): Boolean {
         if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.error = "Podaj prawidłowy adres e-mail"
+            binding.tilEmail.error = "Podaj prawidłowy adres e-mail"
+            binding.etEmail.announceForAccessibility("Podaj prawidłowy adres e-mail")
             return false
         }
+        binding.tilEmail.error = null
         if (password.length < 8) {
-            binding.etPassword.error = "Hasło musi mieć co najmniej 8 znaków"
+            binding.tilPassword.error = "Hasło musi mieć co najmniej 8 znaków"
+            binding.etPassword.announceForAccessibility("Hasło musi mieć co najmniej 8 znaków")
             return false
         }
+        binding.tilPassword.error = null
         return true
     }
 
@@ -129,7 +127,7 @@ class LoginFragment : Fragment() {
                     viewModel.loginWithBiometric()
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    Toast.makeText(requireContext(), "Błąd: $errString", Toast.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, "Błąd: $errString", Snackbar.LENGTH_SHORT).show()
                 }
             })
         biometricPrompt.authenticate(promptInfo)

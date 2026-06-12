@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/frosted_glass" />
+    <corners android:radius="@dimen/scanner_result_card_radius" />
+</shape>

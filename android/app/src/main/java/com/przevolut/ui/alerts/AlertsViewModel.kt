@@ -56,10 +56,36 @@ class AlertsViewModel @Inject constructor(
             try {
                 val response = apiService.deleteAlert("Bearer $token", alertId)
                 if (response.isSuccessful) {
-                    loadAlerts() // Odśwież listę
+                    loadAlerts()
                 }
             } catch (e: Exception) {
                 _uiState.value = AlertsUiState.Error("Nie udało się usunąć alertu.")
+            }
+        }
+    }
+
+    fun createAlert(currency: String, direction: String, targetRate: Double) {
+        if (token.isBlank()) {
+            _uiState.value = AlertsUiState.Error("Zaloguj się, aby dodać alert.")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val response = apiService.createAlert(
+                    "Bearer $token",
+                    com.przevolut.data.remote.model.AlertRequest(
+                        currency = currency,
+                        direction = direction,
+                        targetRate = targetRate
+                    )
+                )
+                if (response.isSuccessful) {
+                    loadAlerts()
+                } else {
+                    _uiState.value = AlertsUiState.Error("Nie udało się utworzyć alertu.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = AlertsUiState.Error("Brak połączenia z serwerem.")
             }
         }
     }

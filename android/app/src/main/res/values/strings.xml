@@ -1,31 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PRZevolut</string>
+    <string name="app_subtitle">Walutowy Skaner AR</string>
 
-    <!-- Login/Register -->
+    <!-- Login -->
     <string name="hint_email">E-mail</string>
     <string name="hint_password">Hasło</string>
     <string name="btn_login">Zaloguj się</string>
     <string name="btn_register">Zarejestruj się</string>
     <string name="btn_biometric">Zaloguj biometrią</string>
+    <string name="label_email">Adres e-mail</string>
+    <string name="label_password">Hasło</string>
+    <string name="cd_app_logo">Logo aplikacji PRZevolut</string>
+    <string name="cd_login_button">Zaloguj się do aplikacji</string>
+    <string name="cd_biometric_button">Zaloguj się biometrycznie</string>
+    <string name="cd_register_link">Przejdź do rejestracji konta</string>
+    <string name="loading_login">Trwa logowanie…</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_greeting">Dzień dobry!</string>
+    <string name="dashboard_date_format">%1$s</string>
+    <string name="dashboard_currencies_count">Śledzone waluty: %1$d</string>
+    <string name="dashboard_chart_title">Kursy walut do PLN</string>
+    <string name="dashboard_rates_list_title">Aktualne kursy</string>
+    <string name="offline_banner">Tryb offline — kursy z %1$s</string>
+    <string name="cd_chart_rates">Wykres kursów walut</string>
+    <string name="cd_rate_card">%1$s %2$s: kurs %3$s PLN</string>
+    <string name="trend_placeholder">+0.12%%</string>
 
     <!-- Alerts -->
-    <string name="no_alerts">Brak aktywnych alertów</string>
+    <string name="no_alerts">Brak alertów</string>
+    <string name="no_alerts_body">Dotknij + aby dodać alert walutowy</string>
     <string name="fab_add_alert">Dodaj alert</string>
     <string name="btn_delete">Usuń</string>
+    <string name="cd_delete_alert">Usuń alert %1$s</string>
+    <string name="alert_status_active">Aktywny</string>
+    <string name="alert_status_triggered">Wyzwolony</string>
+    <string name="alert_status_inactive">Nieaktywny</string>
+    <string name="dialog_add_alert_title">Nowy alert walutowy</string>
+    <string name="dialog_currency_label">Waluta</string>
+    <string name="dialog_direction_label">Kierunek</string>
+    <string name="dialog_direction_above">Powyżej</string>
+    <string name="dialog_direction_below">Poniżej</string>
+    <string name="dialog_threshold_label">Próg kursu (PLN)</string>
+    <string name="dialog_confirm">Dodaj</string>
+    <string name="dialog_cancel">Anuluj</string>
+    <string name="cd_empty_alerts">Ilustracja pustej listy alertów</string>
 
     <!-- Scanner -->
     <string name="scanner_permission_message">Aplikacja wymaga dostępu do aparatu, aby skanować waluty.</string>
     <string name="btn_manual_input">Wpisz ręcznie</string>
+    <string name="btn_retry_permission">Spróbuj ponownie</string>
+    <string name="scanner_selected_currency">Wybrano: %1$s</string>
+    <string name="scanner_rate_info">Kurs: 1 %1$s = %2$s PLN</string>
+    <string name="scanner_result_format">%1$s %2$s</string>
+    <string name="scanner_result_pln">%1$s PLN</string>
+    <string name="scanner_used_rate">Kurs: %1$s PLN</string>
+    <string name="cd_camera_preview">Podgląd kamery do skanowania cen</string>
+    <string name="cd_currency_chips">Wybierz walutę do skanowania</string>
+    <string name="cd_manual_input_fab">Wpisz cenę ręcznie</string>
+    <string name="cd_scanner_result">Wynik przeliczenia</string>
 
     <!-- Settings -->
     <string name="default_currency_label">Domyślna waluta</string>
     <string name="biometric_label">Logowanie biometryczne</string>
     <string name="btn_logout">Wyloguj się</string>
+    <string name="settings_section_general">Ogólne</string>
+    <string name="settings_section_appearance">Wygląd</string>
+    <string name="settings_section_sync">Synchronizacja</string>
+    <string name="settings_theme_label">Motyw aplikacji</string>
+    <string name="settings_theme_light">Jasny</string>
+    <string name="settings_theme_dark">Ciemny</string>
+    <string name="settings_theme_system">Systemowy</string>
+    <string name="settings_refresh_label">Częstotliwość odświeżania</string>
+    <string name="settings_refresh_15">15 minut</string>
+    <string name="settings_refresh_30">30 minut</string>
+    <string name="settings_refresh_60">1 godzina</string>
+    <string name="settings_refresh_240">4 godziny</string>
+    <string name="settings_version">PRZevolut v%1$s</string>
+    <string name="cd_biometric_switch">Włącz lub wyłącz logowanie biometryczne</string>
+    <string name="cd_logout_button">Wyloguj się z aplikacji</string>
 
     <!-- Navigation -->
-    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_dashboard">Kursy</string>
     <string name="nav_scanner">Skaner</string>
     <string name="nav_alerts">Alerty</string>
     <string name="nav_settings">Ustawienia</string>
+
+    <!-- Currency names -->
+    <string name="currency_eur">Euro</string>
+    <string name="currency_usd">Dolar amerykański</string>
+    <string name="currency_gbp">Funt szterling</string>
+    <string name="currency_chf">Frank szwajcarski</string>
+    <string name="currency_czk">Korona czeska</string>
 </resources>

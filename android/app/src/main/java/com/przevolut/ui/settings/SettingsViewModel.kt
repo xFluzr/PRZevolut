@@ -14,6 +14,8 @@ import javax.inject.Inject
 data class AppSettings(
     val defaultCurrency: String = "EUR",
     val biometricEnabled: Boolean = false,
+    val themeMode: String = "system",
+    val refreshIntervalMinutes: Int = 60,
 )
 
 @HiltViewModel
@@ -22,7 +24,6 @@ class SettingsViewModel @Inject constructor(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    // W produkcji użyj DataStore lub EncryptedSharedPreferences
     private val prefs = context.getSharedPreferences("przevolut_prefs", Context.MODE_PRIVATE)
 
     private val _settings = MutableStateFlow(loadSettings())
@@ -32,6 +33,8 @@ class SettingsViewModel @Inject constructor(
         return AppSettings(
             defaultCurrency = prefs.getString("default_currency", "EUR") ?: "EUR",
             biometricEnabled = prefs.getBoolean("biometric_enabled", false),
+            themeMode = prefs.getString("theme_mode", "system") ?: "system",
+            refreshIntervalMinutes = prefs.getInt("refresh_interval_minutes", 60),
         )
     }
 
@@ -45,12 +48,19 @@ class SettingsViewModel @Inject constructor(
         _settings.value = _settings.value.copy(biometricEnabled = enabled)
     }
 
+    fun setThemeMode(mode: String) {
+        prefs.edit().putString("theme_mode", mode).apply()
+        _settings.value = _settings.value.copy(themeMode = mode)
+    }
+
+    fun setRefreshIntervalMinutes(minutes: Int) {
+        prefs.edit().putInt("refresh_interval_minutes", minutes).apply()
+        _settings.value = _settings.value.copy(refreshIntervalMinutes = minutes)
+    }
+
     fun logout() {
         viewModelScope.launch {
-            // Poprawiony logout — czyści token przez TokenManager (auth_prefs / access_token)
             tokenManager.clearToken()
-            // TODO: Nawiguj do LoginFragment przez NavController
         }
     }
 }
-

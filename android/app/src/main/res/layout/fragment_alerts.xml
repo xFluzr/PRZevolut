@@ -4,37 +4,65 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="?android:attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/spacing_xxl"
+            android:indeterminate="true"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tv_empty"
+        <LinearLayout
+            android:id="@+id/layout_empty"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/no_alerts"
-            android:textColor="@color/on_surface"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:padding="32dp"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_xl"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_empty"
+                android:layout_width="@dimen/empty_illustration_size"
+                android:layout_height="@dimen/empty_illustration_size"
+                android:contentDescription="@string/cd_empty_alerts"
+                android:src="@drawable/ic_empty_alerts" />
+
+            <TextView
+                android:id="@+id/tv_empty_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:text="@string/no_alerts"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textColor="?attr/colorOnSurface" />
+
+            <TextView
+                android:id="@+id/tv_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:gravity="center"
+                android:text="@string/no_alerts_body"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_alerts"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:padding="@dimen/spacing_md" />
 
     </LinearLayout>
 
@@ -43,8 +71,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
-        android:contentDescription="@string/fab_add_alert" />
+        android:layout_margin="@dimen/spacing_lg"
+        android:contentDescription="@string/fab_add_alert"
+        android:minHeight="@dimen/touch_target_min"
+        android:minWidth="@dimen/touch_target_min"
+        android:src="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -3,35 +3,39 @@ package com.przevolut.ui.scanner
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.camera.core.*
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.chip.Chip
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.przevolut.R
 import com.przevolut.databinding.FragmentScannerBinding
+import com.przevolut.ui.common.CurrencyUi
 import com.przevolut.utils.PriceDetector
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-/**
- * Ekran 2/5 — Skaner AR.
- * Używa CameraX do podglądu kamery i ML Kit do OCR w czasie rzeczywistym.
- * Wyświetla przeliczoną cenę jako nakładkę AR (ArOverlayView) na podglądzie kamery.
- */
 @AndroidEntryPoint
 class ScannerFragment : Fragment() {
 
@@ -42,11 +46,11 @@ class ScannerFragment : Fragment() {
     private lateinit var cameraExecutor: ExecutorService
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    // Throttle: przetwarzamy OCR max co 500ms żeby nie zalewać ViewModelu
     private var lastOcrTimestamp = 0L
-    private val OCR_THROTTLE_MS = 500L
+    private val ocrThrottleMs = 500L
+    private var selectedCurrency = "EUR"
 
-    // ── Uprawnienia do aparatu ────────────────────────────────────────────
+    private val currencyChips = mutableListOf<Pair<Chip, String>>()
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -54,13 +58,7 @@ class ScannerFragment : Fragment() {
         if (isGranted) {
             startCamera()
         } else {
-            Toast.makeText(
-                requireContext(),
-                "Uprawnienie do kamery jest wymagane do skanowania cen.",
-                Toast.LENGTH_LONG
-            ).show()
-            binding.tvPermissionMessage.visibility = View.VISIBLE
-            binding.previewView.visibility = View.GONE
+            showPermissionDenied()
         }
     }
 
@@ -75,34 +73,63 @@ class ScannerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
+        setupCurrencyChips()
+        setupFabCollapse()
         checkCameraPermission()
         observeViewModel()
 
-        binding.btnManualInput.setOnClickListener {
-            showManualInputDialog()
+        binding.fabManualInput.setOnClickListener { showManualInputDialog() }
+        binding.btnRetryPermission.setOnClickListener {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
+    }
+
+    private fun setupCurrencyChips() {
+        currencyChips.clear()
+        currencyChips.addAll(
+            listOf(
+                binding.chipEur to "EUR",
+                binding.chipUsd to "USD",
+                binding.chipGbp to "GBP",
+                binding.chipChf to "CHF",
+                binding.chipCzk to "CZK",
+            )
+        )
+        currencyChips.forEach { (chip, code) ->
+            chip.text = CurrencyUi.chipLabel(code)
+        }
+
+        binding.chipGroupCurrency.setOnCheckedStateChangeListener { _, checkedIds ->
+            val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
+            selectedCurrency = currencyChips.first { it.first.id == checkedId }.second
+            updateTopBar(viewModel.ratesMap.value[selectedCurrency])
+        }
+    }
+
+    private fun setupFabCollapse() {
+        binding.fabManualInput.postDelayed({
+            if (_binding != null) {
+                binding.fabManualInput.shrink()
+            }
+        }, 3000)
     }
 
     private fun checkCameraPermission() {
         when {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_GRANTED -> startCamera()
-
-            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
-                Toast.makeText(
-                    requireContext(),
-                    "Aplikacja potrzebuje dostępu do kamery, aby skanować ceny.",
-                    Toast.LENGTH_LONG
-                ).show()
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-
+                == PackageManager.PERMISSION_GRANTED -> startCamera()
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> showPermissionDenied()
             else -> requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
+    private fun showPermissionDenied() {
+        binding.layoutPermission.visibility = View.VISIBLE
+        binding.previewView.visibility = View.GONE
+    }
+
     private fun startCamera() {
-        binding.tvPermissionMessage.visibility = View.GONE
+        binding.layoutPermission.visibility = View.GONE
         binding.previewView.visibility = View.VISIBLE
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
@@ -119,7 +146,7 @@ class ScannerFragment : Fragment() {
                 .also { analysis ->
                     analysis.setAnalyzer(cameraExecutor) { imageProxy ->
                         val now = System.currentTimeMillis()
-                        if (now - lastOcrTimestamp >= OCR_THROTTLE_MS) {
+                        if (now - lastOcrTimestamp >= ocrThrottleMs) {
                             lastOcrTimestamp = now
                             processImageForOcr(imageProxy)
                         } else {
@@ -136,15 +163,13 @@ class ScannerFragment : Fragment() {
                     preview,
                     imageAnalyzer
                 )
-                Log.d("ScannerFragment", "Kamera uruchomiona pomyślnie.")
             } catch (e: Exception) {
                 Log.e("ScannerFragment", "Błąd uruchamiania kamery: ${e.message}", e)
             }
-
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+    @OptIn(ExperimentalGetImage::class)
     private fun processImageForOcr(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image ?: run {
             imageProxy.close()
@@ -159,17 +184,12 @@ class ScannerFragment : Fragment() {
             .addOnSuccessListener { visionText ->
                 val raw = visionText.text
                 if (raw.isNotBlank()) {
-                    Log.d("ScannerOCR", "Wykryty tekst: $raw")
                     viewModel.processOcrResult(raw)
 
-                    // AR Overlay: wykryj ceny z pozycjami
-                    val detectedPrices = PriceDetector.detect(
-                        visionText, imageWidth, imageHeight
-                    )
+                    val detectedPrices = PriceDetector.detect(visionText, imageWidth, imageHeight)
                     val rates = viewModel.ratesMap.value
                     binding.arOverlay.updatePrices(detectedPrices, rates)
 
-                    // a11y: Announce detected price for TalkBack users
                     if (detectedPrices.isNotEmpty() && rates.isNotEmpty()) {
                         val first = detectedPrices.first()
                         val rate = rates[first.currency]
@@ -187,43 +207,85 @@ class ScannerFragment : Fragment() {
             .addOnFailureListener { e ->
                 Log.e("ScannerFragment", "OCR error: ${e.message}")
             }
-            .addOnCompleteListener {
-                imageProxy.close()
-            }
+            .addOnCompleteListener { imageProxy.close() }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.ratesMap.collect { rates ->
+                updateTopBar(rates[selectedCurrency])
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.scanResult.collect { result ->
                 result?.let {
                     if (it.convertedAmountPln != null && it.detectedCurrency != null) {
-                        binding.tvOverlayResult.visibility = View.VISIBLE
-                        binding.tvOverlayResult.text =
-                            "%.2f %s = %.2f PLN".format(
-                                it.detectedAmount,
-                                it.detectedCurrency,
-                                it.convertedAmountPln
-                            )
-                        binding.tvRateInfo.text =
-                            "Kurs: 1 ${it.detectedCurrency} = %.4f PLN".format(it.usedRate ?: 0.0)
+                        showResultCard(it)
                     } else {
-                        binding.tvOverlayResult.visibility = View.GONE
-                        binding.tvRateInfo.text = ""
+                        hideResultCard()
                     }
-                }
+                } ?: hideResultCard()
             }
         }
     }
 
-    /**
-     * Dialog ręcznego wpisania kwoty i waluty.
-     * Przydatny gdy OCR nie może odczytać ceny (słabe oświetlenie, niestandardowa czcionka).
-     */
+    private fun updateTopBar(rate: Double?) {
+        binding.tvSelectedCurrency.text = getString(
+            R.string.scanner_selected_currency,
+            selectedCurrency
+        )
+        binding.tvRateInfo.text = if (rate != null) {
+            getString(R.string.scanner_rate_info, selectedCurrency, "%.4f".format(rate))
+        } else {
+            ""
+        }
+        binding.topBar.contentDescription = getString(
+            R.string.scanner_rate_info,
+            selectedCurrency,
+            rate?.let { "%.4f".format(it) } ?: "—"
+        )
+    }
+
+    private fun showResultCard(result: com.przevolut.domain.model.ScanResult) {
+        binding.cardResult.visibility = View.VISIBLE
+        if (shouldAnimate()) {
+            binding.cardResult.translationY = binding.cardResult.height.toFloat()
+            binding.cardResult.animate()
+                .translationY(0f)
+                .setDuration(300)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
+
+        binding.tvDetectedAmount.text = getString(
+            R.string.scanner_result_format,
+            "%.2f".format(result.detectedAmount ?: 0.0),
+            result.detectedCurrency ?: ""
+        )
+        binding.tvConvertedPln.text = getString(
+            R.string.scanner_result_pln,
+            "%.2f".format(result.convertedAmountPln ?: 0.0)
+        )
+        binding.tvUsedRate.text = getString(
+            R.string.scanner_used_rate,
+            "%.4f".format(result.usedRate ?: 0.0)
+        )
+    }
+
+    private fun hideResultCard() {
+        binding.cardResult.visibility = View.GONE
+    }
+
     private fun showManualInputDialog() {
         val input = EditText(requireContext()).apply {
             hint = "np. 49.99 EUR lub €12,50"
-            textSize = 16f
-            setPadding(48, 32, 48, 16)
+            setPadding(
+                resources.getDimensionPixelSize(R.dimen.spacing_xl),
+                resources.getDimensionPixelSize(R.dimen.spacing_lg),
+                resources.getDimensionPixelSize(R.dimen.spacing_xl),
+                resources.getDimensionPixelSize(R.dimen.spacing_md)
+            )
             contentDescription = "Pole do ręcznego wpisania ceny"
         }
 
@@ -240,6 +302,20 @@ class ScannerFragment : Fragment() {
             }
             .setNegativeButton("Anuluj", null)
             .show()
+            .also { dialog ->
+                dialog.setOnShowListener {
+                    input.requestFocus()
+                }
+            }
+    }
+
+    private fun shouldAnimate(): Boolean {
+        val scale = Settings.Global.getFloat(
+            requireContext().contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f
+        )
+        return scale > 0f
     }
 
     override fun onDestroyView() {
