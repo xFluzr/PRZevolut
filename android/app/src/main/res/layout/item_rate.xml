@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:focusable="true"
     app:cardElevation="2dp"
     app:cardCornerRadius="12dp">
 
@@ -21,7 +22,8 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/primary" />
+            android:textColor="@color/primary"
+            android:importantForAccessibility="no" />
 
         <TextView
             android:id="@+id/tv_effective_date"
@@ -30,7 +32,8 @@
             android:layout_weight="1"
             android:textSize="12sp"
             android:textColor="#888888"
-            android:layout_marginStart="8dp" />
+            android:layout_marginStart="8dp"
+            android:importantForAccessibility="no" />
 
         <TextView
             android:id="@+id/tv_rate"
@@ -38,7 +41,8 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/on_surface" />
+            android:textColor="@color/on_surface"
+            android:importantForAccessibility="no" />
 
     </LinearLayout>
 

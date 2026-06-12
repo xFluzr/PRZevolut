@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
@@ -10,7 +11,15 @@
     <androidx.camera.view.PreviewView
         android:id="@+id/preview_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:contentDescription="Podgląd kamery do skanowania cen" />
+
+    <!-- AR Overlay — rysuje ramki i przeliczone ceny na podglądzie kamery -->
+    <com.przevolut.ui.scanner.ArOverlayView
+        android:id="@+id/ar_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
     <!-- Komunikat o braku uprawnień -->
     <TextView
@@ -28,7 +37,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Nakładka AR z wynikiem przeliczenia -->
+    <!-- Nakładka AR z wynikiem przeliczenia (a11y: live region) -->
     <TextView
         android:id="@+id/tv_overlay_result"
         android:layout_width="wrap_content"
@@ -39,10 +48,12 @@
         android:textStyle="bold"
         android:padding="16dp"
         android:visibility="gone"
+        android:accessibilityLiveRegion="polite"
         app:layout_constraintBottom_toTopOf="@id/tv_rate_info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <!-- Informacja o kursie -->
     <TextView
@@ -53,9 +64,52 @@
         android:textColor="#CCFFFFFF"
         android:textSize="12sp"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/btn_manual_input"
+        app:layout_constraintBottom_toTopOf="@id/chip_group_currency"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Chipy wyboru waluty (a11y: labeled group) -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_currency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="Wybierz walutę do skanowania"
+        app:singleSelection="true"
+        app:layout_constraintBottom_toTopOf="@id/btn_manual_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_eur"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EUR"
+            android:checked="true" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_usd"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USD" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_gbp"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GBP" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_chf"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CHF" />
+
+    </com.google.android.material.chip.ChipGroup>
 
     <!-- Przycisk ręcznego wpisania -->
     <com.google.android.material.button.MaterialButton
@@ -64,6 +118,7 @@
         android:layout_height="wrap_content"
         android:text="@string/btn_manual_input"
         android:layout_margin="24dp"
+        android:contentDescription="Wpisz cenę ręcznie zamiast skanowania"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

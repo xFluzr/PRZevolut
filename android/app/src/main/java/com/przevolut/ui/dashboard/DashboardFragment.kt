@@ -73,6 +73,10 @@ class DashboardFragment : Fragment() {
                             binding.tvOfflineBanner.visibility = View.VISIBLE
                             binding.tvOfflineBanner.text =
                                 "📴 Tryb offline — kursy z ${state.lastUpdated}"
+                            // a11y: announce offline state via TalkBack
+                            binding.tvOfflineBanner.announceForAccessibility(
+                                "Tryb offline. Kursy z ${state.lastUpdated}"
+                            )
                         } else {
                             binding.tvOfflineBanner.visibility = View.GONE
                         }

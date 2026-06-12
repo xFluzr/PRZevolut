@@ -31,6 +31,10 @@ class RatesAdapter : ListAdapter<RateEntity, RatesAdapter.RateViewHolder>(DiffCa
             binding.tvCurrencyCode.text = rate.currency
             binding.tvRate.text = "%.4f PLN".format(rate.mid)
             binding.tvEffectiveDate.text = rate.effectiveDate
+
+            // Dostępność: TalkBack odczyta pełny opis karty
+            binding.root.contentDescription =
+                "${rate.currency}: kurs %.4f PLN, data ${rate.effectiveDate}".format(rate.mid)
         }
     }
 

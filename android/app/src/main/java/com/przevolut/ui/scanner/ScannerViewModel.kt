@@ -9,8 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +33,13 @@ class ScannerViewModel @Inject constructor(
 
     private val _scanResult = MutableStateFlow<ScanResult?>(null)
     val scanResult: StateFlow<ScanResult?> = _scanResult
+
+    // Mapa kursów walut do PLN — do użytku przez AR Overlay
+    val ratesMap: StateFlow<Map<String, Double>> = rateDao.getLatestRates()
+        .map { entities ->
+            entities.associate { it.currency to it.mid }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     // Wewnętrzny strumień surowego tekstu z OCR — debounce 300ms
     private val _ocrTextStream = MutableSharedFlow<String>(extraBufferCapacity = 8)
@@ -69,3 +79,4 @@ class ScannerViewModel @Inject constructor(
         // Jeśli nie wykryto — nie czyścimy wyniku, zostawiamy ostatni poprawny wynik na ekranie
     }
 }
+

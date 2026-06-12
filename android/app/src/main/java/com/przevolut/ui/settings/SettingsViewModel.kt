@@ -3,6 +3,7 @@ package com.przevolut.ui.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.przevolut.data.local.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ data class AppSettings(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     // W produkcji użyj DataStore lub EncryptedSharedPreferences
@@ -45,12 +47,10 @@ class SettingsViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            // Wyczyść token i dane sesji
-            prefs.edit()
-                .remove("jwt_token")
-                .remove("refresh_token")
-                .apply()
+            // Poprawiony logout — czyści token przez TokenManager (auth_prefs / access_token)
+            tokenManager.clearToken()
             // TODO: Nawiguj do LoginFragment przez NavController
         }
     }
 }
+

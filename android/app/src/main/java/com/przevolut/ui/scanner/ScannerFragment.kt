@@ -21,6 +21,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.przevolut.databinding.FragmentScannerBinding
+import com.przevolut.utils.PriceDetector
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
@@ -29,7 +30,7 @@ import java.util.concurrent.Executors
 /**
  * Ekran 2/5 — Skaner AR.
  * Używa CameraX do podglądu kamery i ML Kit do OCR w czasie rzeczywistym.
- * Wyświetla przeliczoną cenę jako nakładkę na podglądzie kamery.
+ * Wyświetla przeliczoną cenę jako nakładkę AR (ArOverlayView) na podglądzie kamery.
  */
 @AndroidEntryPoint
 class ScannerFragment : Fragment() {
@@ -151,12 +152,36 @@ class ScannerFragment : Fragment() {
         }
 
         val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+        val imageWidth = imageProxy.width
+        val imageHeight = imageProxy.height
+
         textRecognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
                 val raw = visionText.text
                 if (raw.isNotBlank()) {
                     Log.d("ScannerOCR", "Wykryty tekst: $raw")
                     viewModel.processOcrResult(raw)
+
+                    // AR Overlay: wykryj ceny z pozycjami
+                    val detectedPrices = PriceDetector.detect(
+                        visionText, imageWidth, imageHeight
+                    )
+                    val rates = viewModel.ratesMap.value
+                    binding.arOverlay.updatePrices(detectedPrices, rates)
+
+                    // a11y: Announce detected price for TalkBack users
+                    if (detectedPrices.isNotEmpty() && rates.isNotEmpty()) {
+                        val first = detectedPrices.first()
+                        val rate = rates[first.currency]
+                        if (rate != null) {
+                            val plnAmount = first.amount * rate
+                            binding.arOverlay.announceForAccessibility(
+                                "Wykryto %.2f %s, to jest %.2f złotych".format(
+                                    first.amount, first.currency, plnAmount
+                                )
+                            )
+                        }
+                    }
                 }
             }
             .addOnFailureListener { e ->
@@ -195,13 +220,11 @@ class ScannerFragment : Fragment() {
      * Przydatny gdy OCR nie może odczytać ceny (słabe oświetlenie, niestandardowa czcionka).
      */
     private fun showManualInputDialog() {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(android.R.layout.simple_list_item_2, null)
-
         val input = EditText(requireContext()).apply {
             hint = "np. 49.99 EUR lub €12,50"
             textSize = 16f
             setPadding(48, 32, 48, 16)
+            contentDescription = "Pole do ręcznego wpisania ceny"
         }
 
         AlertDialog.Builder(requireContext())
