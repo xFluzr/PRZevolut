@@ -22,7 +22,6 @@ from app.schemas import (
     RefreshRequest,
     RegisterRequest,
     TokenResponse,
-    UserOut,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -104,7 +103,7 @@ async def refresh_token(payload: RefreshRequest, db: AsyncSession = Depends(get_
     result = await db.execute(
         select(RefreshToken).where(
             RefreshToken.token == payload.refresh_token,
-            RefreshToken.revoked == False,
+            RefreshToken.revoked.is_(False),
         )
     )
     stored_token = result.scalar_one_or_none()

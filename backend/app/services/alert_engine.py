@@ -26,7 +26,7 @@ async def process_alerts(current_rates: list[NbpRate]) -> None:
 
     async with AsyncSessionLocal() as db:
         # Pobierz wszystkie aktywne alerty
-        result = await db.execute(select(Alert).where(Alert.is_active == True))
+        result = await db.execute(select(Alert).where(Alert.is_active))
         alerts = result.scalars().all()
 
         for alert in alerts:
