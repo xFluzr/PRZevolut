@@ -31,7 +31,7 @@ data class LoginResponse(
 
 data class RatesResponse(
     @SerializedName("fetched_at") val fetchedAt: String,
-    val base: String,
+    val base: String? = "PLN",
     val rates: List<RateResponse>
 )
 
@@ -56,21 +56,30 @@ data class RateHistoryPoint(
     @SerializedName("fetched_at") val fetchedAt: String
 )
 
-// ── Alerts ────────────────────────────────────────────────────────────────
+// ── Alerts (zgodne z backendem: currency_code, threshold) ───────────────
 
 data class AlertRequest(
-    val currency: String,
-    val direction: String,  // "below" | "above"
-    @SerializedName("target_rate") val targetRate: Double
+    @SerializedName("currency_code") val currency: String,
+    val direction: String,
+    val threshold: Double
+)
+
+data class AlertUpdateRequest(
+    @SerializedName("currency_code") val currency: String? = null,
+    val direction: String? = null,
+    val threshold: Double? = null,
+    @SerializedName("is_active") val isActive: Boolean? = null
 )
 
 data class AlertResponse(
     val id: Int,
-    val currency: String,
+    @SerializedName("currency_code") val currency: String,
     val direction: String,
-    @SerializedName("target_rate") val targetRate: Double,
+    val threshold: Double,
     @SerializedName("is_active") val isActive: Boolean,
-    @SerializedName("is_triggered") val isTriggered: Boolean,
-    @SerializedName("triggered_at") val triggeredAt: String?,
+    @SerializedName("last_triggered_at") val triggeredAt: String?,
     @SerializedName("created_at") val createdAt: String
-)
+) {
+    val isTriggered: Boolean get() = triggeredAt != null
+    val targetRate: Double get() = threshold
+}

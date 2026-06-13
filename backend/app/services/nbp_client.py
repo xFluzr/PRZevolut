@@ -21,6 +21,13 @@ class NbpRate:
     fetched_at: datetime.datetime
 
 
+@dataclass
+class NbpHistoryPoint:
+    """Pojedynczy punkt historii dziennej z NBP."""
+    rate_to_pln: float
+    effective_date: datetime.datetime
+
+
 async def fetch_nbp_rates() -> list[NbpRate]:
     """
     Pobiera tabelę A kursów walut z api.nbp.pl.
@@ -58,4 +65,49 @@ async def fetch_nbp_rates() -> list[NbpRate]:
             return []
         except Exception as exc:
             logger.exception("Nieoczekiwany błąd podczas pobierania kursów NBP: %s", exc)
+            return []
+
+
+async def fetch_nbp_rate_history(code: str, count: int) -> list[NbpHistoryPoint]:
+    """
+    Pobiera ostatnie N notowań dziennych waluty z NBP (tabela A).
+    NBP zwraca dni robocze — np. last/14 to ~2 tygodnie historii.
+    """
+    url = (
+        f"https://api.nbp.pl/api/exchangerates/rates/a/"
+        f"{code.upper()}/last/{count}/?format=json"
+    )
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            response = await client.get(url, headers={"Accept": "application/json"})
+            response.raise_for_status()
+            data = response.json()
+
+            points: list[NbpHistoryPoint] = []
+            for item in data.get("rates", []):
+                effective = datetime.datetime.strptime(
+                    item["effectiveDate"], "%Y-%m-%d"
+                ).replace(tzinfo=datetime.timezone.utc, hour=12)
+                points.append(
+                    NbpHistoryPoint(rate_to_pln=item["mid"], effective_date=effective)
+                )
+
+            points.sort(key=lambda p: p.effective_date)
+            logger.info(
+                "Pobrano %d punktów historii NBP dla %s", len(points), code.upper()
+            )
+            return points
+
+        except httpx.HTTPError as exc:
+            logger.error(
+                "Błąd HTTP podczas pobierania historii NBP (%s): %s", code, exc
+            )
+            return []
+        except Exception as exc:
+            logger.exception(
+                "Nieoczekiwany błąd podczas pobierania historii NBP (%s): %s",
+                code,
+                exc,
+            )
             return []

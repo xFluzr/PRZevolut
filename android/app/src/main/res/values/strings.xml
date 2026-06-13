@@ -30,8 +30,9 @@
     <string name="dashboard_date_format">%1$s</string>
     <string name="dashboard_currencies_count">Na liście: %1$d walut</string>
     <string name="dashboard_chart_title">Trend kursów (14 dni)</string>
-    <string name="dashboard_chart_subtitle">Ile złotych kosztuje 1 jednostka waluty</string>
+    <string name="dashboard_chart_subtitle">Ostatnie 14 dni roboczych — 1 jednostka waluty w PLN</string>
     <string name="dashboard_chart_hint">Dotknij waluty, aby dodać lub usunąć z wykresu i listy. Przeciągnij wykres palcem.</string>
+    <string name="dashboard_chart_axis_hint">Oś X: dzień · Oś Y: kurs PLN</string>
     <string name="dashboard_chart_empty">Za mało danych historycznych. Odśwież kursy i sprawdź ponownie jutro.</string>
     <string name="dashboard_watchlist_label">Wybierz waluty do śledzenia</string>
     <string name="dashboard_rates_list_title">Twoje kursy</string>
@@ -56,7 +57,10 @@
     <string name="dialog_direction_above">Powyżej</string>
     <string name="dialog_direction_below">Poniżej</string>
     <string name="dialog_threshold_label">Próg kursu (PLN)</string>
+    <string name="dialog_edit_alert_title">Edytuj alert</string>
     <string name="dialog_confirm">Dodaj</string>
+    <string name="dialog_confirm_save">Zapisz</string>
+    <string name="alerts_tap_to_edit">Dotknij alertu, aby edytować próg</string>
     <string name="dialog_cancel">Anuluj</string>
     <string name="cd_empty_alerts">Ilustracja pustej listy alertów</string>
 

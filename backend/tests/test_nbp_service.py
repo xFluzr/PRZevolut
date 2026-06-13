@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from app.services.alert_engine import _check_threshold_crossed
-from app.services.nbp_client import NbpRate, fetch_nbp_rates
+from app.services.nbp_client import NbpRate, fetch_nbp_rate_history, fetch_nbp_rates
 
 MOCK_NBP_RESPONSE = [
     {
@@ -72,6 +72,41 @@ class TestNbpClient:
             rates = await fetch_nbp_rates()
 
         assert rates == []
+
+
+MOCK_NBP_HISTORY_RESPONSE = {
+    "table": "A",
+    "currency": "euro",
+    "code": "EUR",
+    "rates": [
+        {"no": "100/A/NBP/2026", "effectiveDate": "2026-05-28", "mid": 4.3012},
+        {"no": "101/A/NBP/2026", "effectiveDate": "2026-05-29", "mid": 4.3156},
+        {"no": "102/A/NBP/2026", "effectiveDate": "2026-06-02", "mid": 4.2890},
+    ],
+}
+
+
+class TestNbpHistoryClient:
+    @pytest.mark.asyncio
+    async def test_fetch_nbp_rate_history_success(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = MOCK_NBP_HISTORY_RESPONSE
+        mock_response.raise_for_status = MagicMock()
+
+        with patch("app.services.nbp_client.httpx.AsyncClient") as MockClient:
+            mock_client_instance = AsyncMock()
+            mock_client_instance.get.return_value = mock_response
+            mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+            mock_client_instance.__aexit__ = AsyncMock(return_value=False)
+            MockClient.return_value = mock_client_instance
+
+            points = await fetch_nbp_rate_history("EUR", 14)
+
+        assert len(points) == 3
+        assert points[0].rate_to_pln == 4.3012
+        assert points[-1].rate_to_pln == 4.2890
+        assert points[0].effective_date < points[-1].effective_date
 
 
 class TestAlertEngine:

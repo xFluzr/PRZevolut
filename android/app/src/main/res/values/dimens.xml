@@ -19,7 +19,8 @@
     <dimen name="button_height">52dp</dimen>
     <dimen name="touch_target_min">48dp</dimen>
     <dimen name="bottom_nav_height">64dp</dimen>
-    <dimen name="chart_height">200dp</dimen>
+    <dimen name="fab_margin_above_bottom_nav">88dp</dimen>
+    <dimen name="chart_height">260dp</dimen>
     <dimen name="currency_flag_size">32dp</dimen>
     <dimen name="avatar_size">48dp</dimen>
     <dimen name="status_stripe_width">4dp</dimen>

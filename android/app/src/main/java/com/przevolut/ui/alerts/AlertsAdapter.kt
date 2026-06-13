@@ -12,6 +12,7 @@ import com.przevolut.databinding.ItemAlertBinding
 import com.przevolut.ui.common.CurrencyUi
 
 class AlertsAdapter(
+    private val onEditClick: (AlertResponse) -> Unit,
     private val onDeleteClick: (AlertResponse) -> Unit
 ) : ListAdapter<AlertResponse, AlertsAdapter.AlertViewHolder>(DiffCallback()) {
 
@@ -72,6 +73,7 @@ class AlertsAdapter(
                 alert.currency
             )
             binding.btnDeleteAlert.setOnClickListener { onDeleteClick(alert) }
+            binding.cardAlert.setOnClickListener { onEditClick(alert) }
 
             val directionLabel = if (alert.direction == "below") "poniżej" else "powyżej"
             binding.root.contentDescription =

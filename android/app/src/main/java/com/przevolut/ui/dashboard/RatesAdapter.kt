@@ -67,5 +67,9 @@ class RatesAdapter : ListAdapter<RateEntity, RatesAdapter.RateViewHolder>(DiffCa
 fun resolveAttrColor(context: Context, @AttrRes attr: Int): Int {
     val typedValue = TypedValue()
     context.theme.resolveAttribute(attr, typedValue, true)
-    return typedValue.data
+    return if (typedValue.type == TypedValue.TYPE_REFERENCE && typedValue.resourceId != 0) {
+        ContextCompat.getColor(context, typedValue.resourceId)
+    } else {
+        typedValue.data
+    }
 }

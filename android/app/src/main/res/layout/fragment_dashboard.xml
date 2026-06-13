@@ -132,8 +132,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/chart_height"
                         android:layout_marginTop="@dimen/spacing_sm"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
                         android:contentDescription="@string/cd_chart_rates"
                         android:importantForAccessibility="yes" />
+
+                    <TextView
+                        android:id="@+id/tv_chart_axis_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:gravity="center"
+                        android:text="@string/dashboard_chart_axis_hint"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
                         android:id="@+id/tv_chart_empty"

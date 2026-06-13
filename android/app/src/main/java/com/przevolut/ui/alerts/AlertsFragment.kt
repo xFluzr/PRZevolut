@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.przevolut.R
+import com.przevolut.data.remote.model.AlertResponse
 import com.przevolut.databinding.DialogAddAlertBinding
 import com.przevolut.databinding.FragmentAlertsBinding
 import com.przevolut.ui.common.CurrencyUi
@@ -36,20 +37,27 @@ class AlertsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeViewModel()
-        binding.fabAddAlert.setOnClickListener { showAddAlertDialog() }
+        binding.fabAddAlert.setOnClickListener { showAlertDialog() }
+        binding.btnAddAlert.setOnClickListener { showAlertDialog() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadAlerts()
     }
 
     private fun setupRecyclerView() {
-        alertsAdapter = AlertsAdapter(onDeleteClick = { alert ->
-            viewModel.deleteAlert(alert.id)
-        })
+        alertsAdapter = AlertsAdapter(
+            onEditClick = { alert -> showAlertDialog(alert) },
+            onDeleteClick = { alert -> viewModel.deleteAlert(alert.id) }
+        )
         binding.rvAlerts.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = alertsAdapter
         }
     }
 
-    private fun showAddAlertDialog() {
+    private fun showAlertDialog(existing: AlertResponse? = null) {
         val dialogBinding = DialogAddAlertBinding.inflate(layoutInflater)
         val currencyChips = listOf(
             dialogBinding.chipEur to "EUR",
@@ -62,8 +70,24 @@ class AlertsFragment : Fragment() {
             chip.text = CurrencyUi.chipLabel(code)
         }
 
-        var selectedCurrency = "EUR"
-        var selectedDirection = "above"
+        var selectedCurrency = existing?.currency ?: "EUR"
+        var selectedDirection = existing?.direction ?: "above"
+
+        if (existing != null) {
+            dialogBinding.chipGroupCurrency.isEnabled = false
+            currencyChips.forEach { (chip, code) ->
+                chip.isChecked = code == existing.currency
+            }
+            dialogBinding.etThreshold.setText("%.4f".format(existing.threshold))
+            if (existing.direction == "below") {
+                dialogBinding.btnBelow.isChecked = true
+            } else {
+                dialogBinding.btnAbove.isChecked = true
+            }
+        } else {
+            dialogBinding.chipEur.isChecked = true
+            dialogBinding.btnAbove.isChecked = true
+        }
 
         dialogBinding.chipGroupCurrency.setOnCheckedStateChangeListener { _, checkedIds ->
             val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
@@ -78,18 +102,21 @@ class AlertsFragment : Fragment() {
                 }
             }
         }
-        dialogBinding.btnAbove.isChecked = true
 
+        val isEdit = existing != null
         val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_add_alert_title)
+            .setTitle(if (isEdit) R.string.dialog_edit_alert_title else R.string.dialog_add_alert_title)
             .setView(dialogBinding.root)
             .setNegativeButton(R.string.dialog_cancel, null)
-            .setPositiveButton(R.string.dialog_confirm, null)
+            .setPositiveButton(
+                if (isEdit) R.string.dialog_confirm_save else R.string.dialog_confirm,
+                null
+            )
             .create()
 
         dialog.setOnShowListener {
             val confirmButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
-            confirmButton.isEnabled = false
+            confirmButton.isEnabled = existing != null
 
             dialogBinding.etThreshold.addTextChangedListener(
                 object : android.text.TextWatcher {
@@ -105,7 +132,11 @@ class AlertsFragment : Fragment() {
             confirmButton.setOnClickListener {
                 val threshold = dialogBinding.etThreshold.text?.toString()?.toDoubleOrNull()
                 if (threshold != null && threshold > 0) {
-                    viewModel.createAlert(selectedCurrency, selectedDirection, threshold)
+                    if (isEdit) {
+                        viewModel.updateAlert(existing!!.id, selectedDirection, threshold)
+                    } else {
+                        viewModel.createAlert(selectedCurrency, selectedDirection, threshold)
+                    }
                     dialog.dismiss()
                 }
             }
@@ -133,6 +164,10 @@ class AlertsFragment : Fragment() {
                         val isEmpty = state.alerts.isEmpty()
                         binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
                         binding.rvAlerts.visibility = if (isEmpty) View.GONE else View.VISIBLE
+                        if (isEmpty) {
+                            binding.tvEmpty.text = getString(R.string.no_alerts_body) +
+                                "\n\n" + getString(R.string.alerts_tap_to_edit)
+                        }
                     }
                     is AlertsUiState.Error -> {
                         binding.progressBar.visibility = View.GONE

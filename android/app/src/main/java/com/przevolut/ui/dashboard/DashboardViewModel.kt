@@ -10,6 +10,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
 
@@ -137,22 +140,65 @@ class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun fetchHistory(currency: String): List<ChartPoint> {
+        val fromApi = fetchDailyHistoryFromApi(currency)
+        if (fromApi.size >= 2) return fromApi
+
+        val fromLocal = aggregateToDailyPoints(
+            rateDao.getHistoryForCurrency(currency).map {
+                ChartPoint(it.fetchedAt, it.mid.toFloat())
+            }
+        ).takeLast(14)
+
+        return if (fromLocal.size >= 2) fromLocal else emptyList()
+    }
+
+    private suspend fun fetchDailyHistoryFromApi(currency: String): List<ChartPoint> {
         try {
             val response = apiService.getRateHistory(currency, 14)
             if (response.isSuccessful) {
-                val points = response.body()?.history.orEmpty().mapNotNull { point ->
-                    parseTimestamp(point.fetchedAt)?.let { ts ->
-                        ChartPoint(ts, point.rate.toFloat())
+                return response.body()?.history.orEmpty()
+                    .mapNotNull { point ->
+                        parseDayTimestamp(point.fetchedAt)?.let { dayMillis ->
+                            ChartPoint(dayMillis, point.rate.toFloat())
+                        }
                     }
-                }
-                if (points.isNotEmpty()) return points
+                    .distinctBy { it.timestamp }
+                    .sortedBy { it.timestamp }
+                    .takeLast(14)
             }
         } catch (_: Exception) {
-            // fallback do lokalnej historii
+            // brak API — fallback do lokalnej agregacji dziennej
         }
-        return rateDao.getHistoryForCurrency(currency).map {
-            ChartPoint(it.fetchedAt, it.mid.toFloat())
+        return emptyList()
+    }
+
+    private fun aggregateToDailyPoints(points: List<ChartPoint>): List<ChartPoint> {
+        if (points.isEmpty()) return emptyList()
+        val zone = ZoneId.systemDefault()
+        return points
+            .groupBy { Instant.ofEpochMilli(it.timestamp).atZone(zone).toLocalDate() }
+            .toSortedMap()
+            .map { (date, dayPoints) ->
+                ChartPoint(toDayMillis(date, zone), dayPoints.last().ratePln)
+            }
+    }
+
+    private fun parseDayTimestamp(raw: String): Long? {
+        val zone = ZoneId.systemDefault()
+        val localDate = try {
+            Instant.parse(raw).atZone(zone).toLocalDate()
+        } catch (_: Exception) {
+            try {
+                LocalDate.parse(raw.substring(0, 10))
+            } catch (_: Exception) {
+                return null
+            }
         }
+        return toDayMillis(localDate, zone)
+    }
+
+    private fun toDayMillis(date: LocalDate, zone: ZoneId): Long {
+        return date.atTime(12, 0).atZone(zone).toInstant().toEpochMilli()
     }
 
     private suspend fun showOfflineIfNoData() {
@@ -171,27 +217,8 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun parseTimestamp(raw: String): Long? {
-        val formats = listOf(
-            "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
-            "yyyy-MM-dd'T'HH:mm:ss",
-            "yyyy-MM-dd'T'HH:mm:ssX",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSX"
-        )
-        for (pattern in formats) {
-            try {
-                val sdf = SimpleDateFormat(pattern, Locale.US)
-                sdf.timeZone = TimeZone.getTimeZone("UTC")
-                return sdf.parse(raw)?.time
-            } catch (_: Exception) {
-                // próbuj następny format
-            }
-        }
-        return null
-    }
-
     private fun formatTimestamp(millis: Long): String {
-        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+        val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         return sdf.format(Date(millis))
     }
 }

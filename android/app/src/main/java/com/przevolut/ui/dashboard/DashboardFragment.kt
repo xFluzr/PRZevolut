@@ -13,9 +13,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
@@ -39,7 +41,8 @@ class DashboardFragment : Fragment() {
     private val viewModel: DashboardViewModel by viewModels()
     private lateinit var ratesAdapter: RatesAdapter
     private val currencyChips = mutableListOf<Pair<Chip, String>>()
-    private val dateFormat = SimpleDateFormat("dd.MM", Locale("pl", "PL"))
+    private val dateFormat = SimpleDateFormat("d.MM", Locale("pl", "PL"))
+    private var chartTimestamps: List<Long> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -89,10 +92,11 @@ class DashboardFragment : Fragment() {
     private fun setupChartInteraction() {
         binding.lineChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry?, h: Highlight?) {
-                if (e == null) return
+                if (e == null || chartTimestamps.isEmpty()) return
                 val dataSet = binding.lineChart.data?.getDataSetByIndex(h?.dataSetIndex ?: 0)
                 val label = dataSet?.label ?: ""
-                val date = dateFormat.format(Date(e.x.toLong()))
+                val index = e.x.toInt().coerceIn(0, chartTimestamps.lastIndex)
+                val date = dateFormat.format(Date(chartTimestamps[index]))
                 Snackbar.make(
                     binding.cardChart,
                     "1 $label = ${"%.4f".format(e.y)} PLN ($date)",
@@ -169,9 +173,14 @@ class DashboardFragment : Fragment() {
         binding.lineChart.visibility = View.VISIBLE
         binding.tvChartEmpty.visibility = View.GONE
 
+        chartTimestamps = nonEmpty.values.first().map { it.timestamp }
+        val dateLabels = chartTimestamps.map { dateFormat.format(Date(it)) }.toTypedArray()
+
+        val axisLabelColor = ContextCompat.getColor(requireContext(), R.color.on_surface_variant)
+        val axisStrokeColor = ContextCompat.getColor(requireContext(), R.color.outline)
         val dataSets = nonEmpty.map { (currency, points) ->
-            val entries = points.map { point ->
-                Entry(point.timestamp.toFloat(), point.ratePln)
+            val entries = points.mapIndexed { index, point ->
+                Entry(index.toFloat(), point.ratePln)
             }
             LineDataSet(entries, currency).apply {
                 color = ContextCompat.getColor(requireContext(), CurrencyUi.colorRes(currency))
@@ -180,13 +189,13 @@ class DashboardFragment : Fragment() {
                 circleRadius = 3.5f
                 setDrawCircleHole(false)
                 setDrawValues(false)
-                mode = LineDataSet.Mode.CUBIC_BEZIER
-                cubicIntensity = 0.15f
+                mode = LineDataSet.Mode.LINEAR
                 highLightColor = resolveAttrColor(requireContext(), com.google.android.material.R.attr.colorPrimary)
             }
         }
 
         binding.lineChart.apply {
+            clear()
             data = LineData(dataSets)
             description.isEnabled = false
             setTouchEnabled(true)
@@ -195,22 +204,39 @@ class DashboardFragment : Fragment() {
             setPinchZoom(true)
             setDrawGridBackground(false)
             setNoDataText(getString(R.string.dashboard_chart_empty))
+            setExtraOffsets(48f, 12f, 16f, 32f)
+            setMinOffset(12f)
 
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
-                textColor = resolveAttrColor(requireContext(), android.R.attr.textColorSecondary)
+                setDrawAxisLine(true)
+                setDrawLabels(true)
+                textColor = axisLabelColor
+                axisLineColor = axisStrokeColor
+                textSize = 11f
+                yOffset = 8f
                 granularity = 1f
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return dateFormat.format(Date(value.toLong()))
-                    }
-                }
+                isGranularityEnabled = true
+                setAvoidFirstLastClipping(true)
+                axisMinimum = 0f
+                axisMaximum = (chartTimestamps.size - 1).coerceAtLeast(0).toFloat()
+                setLabelCount(minOf(6, chartTimestamps.size).coerceAtLeast(2), true)
+                valueFormatter = IndexAxisValueFormatter(dateLabels)
             }
             axisLeft.apply {
                 setDrawGridLines(true)
-                gridColor = Color.argb(40, 128, 128, 128)
-                textColor = resolveAttrColor(requireContext(), android.R.attr.textColorSecondary)
+                setDrawAxisLine(true)
+                setDrawLabels(true)
+                setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART)
+                gridColor = Color.argb(50, 168, 176, 188)
+                textColor = axisLabelColor
+                axisLineColor = axisStrokeColor
+                textSize = 11f
+                xOffset = 10f
+                spaceTop = 10f
+                spaceBottom = 10f
+                setLabelCount(5, true)
                 valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float) = "%.2f".format(value)
                 }
@@ -221,7 +247,7 @@ class DashboardFragment : Fragment() {
                 horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
                 orientation = Legend.LegendOrientation.HORIZONTAL
                 setDrawInside(false)
-                textColor = resolveAttrColor(requireContext(), android.R.attr.textColorSecondary)
+                textColor = axisLabelColor
             }
 
             contentDescription = nonEmpty.entries.joinToString(", ") { (code, pts) ->
@@ -229,8 +255,9 @@ class DashboardFragment : Fragment() {
                 "$code: ${latest?.let { "%.4f".format(it) } ?: "—"} PLN"
             }
 
-            if (shouldAnimate()) animateX(600)
-            invalidate()
+            notifyDataSetChanged()
+            if (shouldAnimate()) animateX(400) else invalidate()
+            post { invalidate() }
         }
     }
 
