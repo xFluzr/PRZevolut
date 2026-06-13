@@ -2,6 +2,14 @@
 <resources>
     <string name="app_name">PRZevolut</string>
     <string name="app_subtitle">Walutowy Skaner AR</string>
+    <string name="login_hero_subtitle">Kursy NBP · Skaner AR · Alerty walutowe</string>
+    <string name="login_feature_nbp">Kursy NBP</string>
+    <string name="login_feature_offline">Offline</string>
+    <string name="login_feature_ar">Skaner AR</string>
+    <string name="login_or_continue">lub kontynuuj z</string>
+    <string name="cd_theme_toggle">Przełącz tryb jasny lub ciemny</string>
+    <string name="cd_theme_light">Włącz tryb jasny</string>
+    <string name="cd_theme_dark">Włącz tryb ciemny</string>
 
     <!-- Login -->
     <string name="hint_email">E-mail</string>

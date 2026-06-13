@@ -19,16 +19,70 @@ PRZevolut/
 └── docker-compose.yml
 ```
 
-## Uruchomienie (Docker Compose)
+## Uruchomienie backendu (Docker)
 
-Najszybszy sposób na postawienie backendu z PostgreSQL:
+Wymagania: [Docker](https://docs.docker.com/get-docker/) i Docker Compose v2 (daemon musi być uruchomiony).
+
+### 1. Przygotuj konfigurację
 
 ```bash
+cd /ścieżka/do/PRZevolut
 cp .env.example .env
+```
+
+Opcjonalnie wygeneruj bezpieczny klucz JWT:
+
+```bash
+openssl rand -hex 32
+# Wklej wynik do SECRET_KEY= w pliku .env
+```
+
+### 2. Uruchom backend + PostgreSQL
+
+```bash
 docker compose up --build
 ```
 
-API będzie dostępne pod adresem `http://localhost:8000` (dokumentacja: `/docs`).
+Pierwsze uruchomienie zbuduje obraz backendu i wykona migracje Alembic.
+
+### 3. Sprawdź, czy działa
+
+| Co | URL |
+|----|-----|
+| API | http://localhost:8000 |
+| Dokumentacja Swagger | http://localhost:8000/docs |
+| Health check | http://localhost:8000/health |
+
+```bash
+curl http://localhost:8000/
+curl http://localhost:8000/health
+```
+
+### 4. Przydatne komendy
+
+```bash
+# Uruchom w tle
+docker compose up -d --build
+
+# Logi backendu
+docker compose logs -f backend
+
+# Zatrzymaj
+docker compose down
+
+# Zatrzymaj i usuń dane bazy
+docker compose down -v
+```
+
+### 5. Podłączenie aplikacji Android
+
+W `android/local.properties`:
+
+```properties
+BASE_URL="http://10.0.2.2:8000"
+```
+
+`10.0.2.2` to localhost hosta widziany z emulatora Android. Na fizycznym telefonie użyj IP komputera w sieci LAN, np. `http://192.168.1.10:8000`.
 
 ## Uruchomienie lokalne (Backend)
 

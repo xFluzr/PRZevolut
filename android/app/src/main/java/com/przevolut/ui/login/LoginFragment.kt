@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.przevolut.R
 import com.przevolut.databinding.FragmentLoginBinding
+import com.przevolut.ui.common.ThemeHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -25,6 +26,8 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
 
+    private var isRegisterMode = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -34,25 +37,51 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupThemeToggle()
+        setupAuthModeToggle()
         setupClickListeners()
         observeViewModel()
         setupBiometricIfAvailable()
     }
 
-    private fun setupClickListeners() {
-        binding.btnLogin.setOnClickListener {
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString()
-            if (validateInput(email, password)) {
-                viewModel.login(email, password)
-            }
+    private fun setupThemeToggle() {
+        updateThemeToggleIcon()
+        binding.btnThemeToggle.setOnClickListener {
+            ThemeHelper.toggleLightDark(requireContext())
+            updateThemeToggleIcon()
         }
+    }
 
-        binding.tvRegister.setOnClickListener {
+    private fun updateThemeToggleIcon() {
+        val isDark = ThemeHelper.isDarkMode(requireContext())
+        binding.btnThemeToggle.setIconResource(if (isDark) R.drawable.ic_sun else R.drawable.ic_moon)
+        binding.btnThemeToggle.contentDescription = getString(
+            if (isDark) R.string.cd_theme_light else R.string.cd_theme_dark
+        )
+    }
+
+    private fun setupAuthModeToggle() {
+        binding.btnModeLogin.isChecked = true
+        binding.toggleAuthMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            isRegisterMode = checkedId == R.id.btn_mode_register
+            binding.btnSubmit.text = getString(
+                if (isRegisterMode) R.string.btn_register else R.string.btn_login
+            )
+            binding.btnSubmit.contentDescription = binding.btnSubmit.text
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.btnSubmit.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString()
             if (validateInput(email, password)) {
-                viewModel.register(email, password)
+                if (isRegisterMode) {
+                    viewModel.register(email, password)
+                } else {
+                    viewModel.login(email, password)
+                }
             }
         }
 
@@ -65,7 +94,7 @@ class LoginFragment : Fragment() {
                 when (state) {
                     is LoginUiState.Loading -> {
                         binding.progressIndicator.visibility = View.VISIBLE
-                        binding.btnLogin.isEnabled = false
+                        binding.btnSubmit.isEnabled = false
                     }
                     is LoginUiState.Success -> {
                         binding.progressIndicator.visibility = View.GONE
@@ -74,13 +103,13 @@ class LoginFragment : Fragment() {
                     }
                     is LoginUiState.Error -> {
                         binding.progressIndicator.visibility = View.GONE
-                        binding.btnLogin.isEnabled = true
-                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                        binding.root.announceForAccessibility(state.message)
+                        binding.btnSubmit.isEnabled = true
+                        Snackbar.make(binding.cardLogin, state.message, Snackbar.LENGTH_LONG).show()
+                        binding.cardLogin.announceForAccessibility(state.message)
                     }
                     is LoginUiState.Idle -> {
                         binding.progressIndicator.visibility = View.GONE
-                        binding.btnLogin.isEnabled = true
+                        binding.btnSubmit.isEnabled = true
                     }
                 }
             }
@@ -127,7 +156,7 @@ class LoginFragment : Fragment() {
                     viewModel.loginWithBiometric()
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    Snackbar.make(binding.root, "Błąd: $errString", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.cardLogin, "Błąd: $errString", Snackbar.LENGTH_SHORT).show()
                 }
             })
         biometricPrompt.authenticate(promptInfo)

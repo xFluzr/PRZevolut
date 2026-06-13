@@ -68,4 +68,14 @@
     <color name="text_dimmed">#888888</color>
     <color name="frosted_glass">#B3FFFFFF</color>
     <color name="scanner_background">#000000</color>
+
+    <!-- Login screen -->
+    <color name="login_bg_top">#0A2540</color>
+    <color name="login_bg_mid">#0D47A1</color>
+    <color name="login_bg_bottom">#1565C0</color>
+    <color name="login_glow">#334FC3F7</color>
+    <color name="login_hero_text">#FFFFFF</color>
+    <color name="login_hero_subtext">#B3FFFFFF</color>
+    <color name="login_badge_bg">#1AFFFFFF</color>
+    <color name="login_divider">#33FFFFFF</color>
 </resources>

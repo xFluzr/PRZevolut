@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.przevolut.BuildConfig
 import com.przevolut.R
 import com.przevolut.databinding.FragmentSettingsBinding
+import com.przevolut.ui.common.ThemeHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -59,7 +59,7 @@ class SettingsFragment : Fragment() {
                 else -> "system"
             }
             viewModel.setThemeMode(mode)
-            applyTheme(mode)
+            ThemeHelper.applyTheme(mode)
         }
 
         binding.btnLogout.setOnClickListener { viewModel.logout() }
@@ -122,15 +122,6 @@ class SettingsFragment : Fragment() {
                 suppressRefreshCallback = false
             }
         }
-    }
-
-    private fun applyTheme(mode: String) {
-        val nightMode = when (mode) {
-            "light" -> AppCompatDelegate.MODE_NIGHT_NO
-            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
-        AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
     private data class RefreshOption(val minutes: Int, val labelRes: Int)

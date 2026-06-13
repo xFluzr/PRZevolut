@@ -29,4 +29,6 @@
     <dimen name="chip_min_height">40dp</dimen>
     <dimen name="empty_illustration_size">120dp</dimen>
     <dimen name="divider_height">1dp</dimen>
+    <dimen name="login_hero_logo_size">72dp</dimen>
+    <dimen name="login_glow_size">280dp</dimen>
 </resources>
