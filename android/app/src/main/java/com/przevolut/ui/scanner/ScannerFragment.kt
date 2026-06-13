@@ -22,7 +22,9 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -43,7 +45,8 @@ class ScannerFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: ScannerViewModel by viewModels()
 
-    private lateinit var cameraExecutor: ExecutorService
+    private var cameraExecutor: ExecutorService? = null
+    private var cameraProvider: ProcessCameraProvider? = null
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     private var lastOcrTimestamp = 0L
@@ -84,6 +87,11 @@ class ScannerFragment : Fragment() {
         }
     }
 
+    override fun onStop() {
+        stopCamera()
+        super.onStop()
+    }
+
     private fun setupCurrencyChips() {
         currencyChips.clear()
         currencyChips.addAll(
@@ -108,9 +116,7 @@ class ScannerFragment : Fragment() {
 
     private fun setupFabCollapse() {
         binding.fabManualInput.postDelayed({
-            if (_binding != null) {
-                binding.fabManualInput.shrink()
-            }
+            _binding?.fabManualInput?.shrink()
         }, 3000)
     }
 
@@ -124,17 +130,23 @@ class ScannerFragment : Fragment() {
     }
 
     private fun showPermissionDenied() {
-        binding.layoutPermission.visibility = View.VISIBLE
-        binding.previewView.visibility = View.GONE
+        val b = _binding ?: return
+        b.layoutPermission.visibility = View.VISIBLE
+        b.previewView.visibility = View.GONE
     }
 
     private fun startCamera() {
+        if (!isAdded || _binding == null) return
+
         binding.layoutPermission.visibility = View.GONE
         binding.previewView.visibility = View.VISIBLE
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
+            if (!isAdded || _binding == null) return@addListener
+
+            val provider = cameraProviderFuture.get()
+            cameraProvider = provider
 
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(binding.previewView.surfaceProvider)
@@ -144,7 +156,7 @@ class ScannerFragment : Fragment() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also { analysis ->
-                    analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                    analysis.setAnalyzer(cameraExecutor!!) { imageProxy ->
                         val now = System.currentTimeMillis()
                         if (now - lastOcrTimestamp >= ocrThrottleMs) {
                             lastOcrTimestamp = now
@@ -156,8 +168,8 @@ class ScannerFragment : Fragment() {
                 }
 
             try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
+                provider.unbindAll()
+                provider.bindToLifecycle(
                     viewLifecycleOwner,
                     CameraSelector.DEFAULT_BACK_CAMERA,
                     preview,
@@ -167,6 +179,14 @@ class ScannerFragment : Fragment() {
                 Log.e("ScannerFragment", "Błąd uruchamiania kamery: ${e.message}", e)
             }
         }, ContextCompat.getMainExecutor(requireContext()))
+    }
+
+    private fun stopCamera() {
+        try {
+            cameraProvider?.unbindAll()
+        } catch (e: Exception) {
+            Log.w("ScannerFragment", "Błąd zatrzymywania kamery: ${e.message}")
+        }
     }
 
     @OptIn(ExperimentalGetImage::class)
@@ -182,6 +202,8 @@ class ScannerFragment : Fragment() {
 
         textRecognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
+                if (!isBindingActive()) return@addOnSuccessListener
+
                 val raw = visionText.text
                 if (raw.isNotBlank()) {
                     viewModel.processOcrResult(raw)
@@ -210,27 +232,40 @@ class ScannerFragment : Fragment() {
             .addOnCompleteListener { imageProxy.close() }
     }
 
+    private fun isBindingActive(): Boolean {
+        return _binding != null && isAdded && viewLifecycleOwner.lifecycle.currentState.isAtLeast(
+            Lifecycle.State.STARTED
+        )
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.ratesMap.collect { rates ->
-                updateTopBar(rates[selectedCurrency])
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.scanResult.collect { result ->
-                result?.let {
-                    if (it.convertedAmountPln != null && it.detectedCurrency != null) {
-                        showResultCard(it)
-                    } else {
-                        hideResultCard()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.ratesMap.collect { rates ->
+                        if (isBindingActive()) {
+                            updateTopBar(rates[selectedCurrency])
+                        }
                     }
-                } ?: hideResultCard()
+                }
+                launch {
+                    viewModel.scanResult.collect { result ->
+                        if (!isBindingActive()) return@collect
+                        result?.let {
+                            if (it.convertedAmountPln != null && it.detectedCurrency != null) {
+                                showResultCard(it)
+                            } else {
+                                hideResultCard()
+                            }
+                        } ?: hideResultCard()
+                    }
+                }
             }
         }
     }
 
     private fun updateTopBar(rate: Double?) {
+        if (!isBindingActive()) return
         binding.tvSelectedCurrency.text = getString(
             R.string.scanner_selected_currency,
             selectedCurrency
@@ -248,6 +283,7 @@ class ScannerFragment : Fragment() {
     }
 
     private fun showResultCard(result: com.przevolut.domain.model.ScanResult) {
+        if (!isBindingActive()) return
         binding.cardResult.visibility = View.VISIBLE
         if (shouldAnimate()) {
             binding.cardResult.translationY = binding.cardResult.height.toFloat()
@@ -274,7 +310,7 @@ class ScannerFragment : Fragment() {
     }
 
     private fun hideResultCard() {
-        binding.cardResult.visibility = View.GONE
+        _binding?.cardResult?.visibility = View.GONE
     }
 
     private fun showManualInputDialog() {
@@ -303,9 +339,7 @@ class ScannerFragment : Fragment() {
             .setNegativeButton("Anuluj", null)
             .show()
             .also { dialog ->
-                dialog.setOnShowListener {
-                    input.requestFocus()
-                }
+                dialog.setOnShowListener { input.requestFocus() }
             }
     }
 
@@ -319,8 +353,11 @@ class ScannerFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
-        cameraExecutor.shutdown()
+        stopCamera()
+        cameraProvider = null
+        cameraExecutor?.shutdown()
+        cameraExecutor = null
         _binding = null
+        super.onDestroyView()
     }
 }

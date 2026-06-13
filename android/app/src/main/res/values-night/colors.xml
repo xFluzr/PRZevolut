@@ -58,13 +58,15 @@
     <color name="frosted_glass">#B31E1E2A</color>
     <color name="scanner_background">#000000</color>
 
-    <!-- Login screen -->
+    <!-- Login screen — ciemny motyw -->
     <color name="login_bg_top">#050B14</color>
     <color name="login_bg_mid">#0A1929</color>
     <color name="login_bg_bottom">#132F4C</color>
     <color name="login_glow">#331976D2</color>
     <color name="login_hero_text">#E8EAF0</color>
     <color name="login_hero_subtext">#99A8B8</color>
-    <color name="login_badge_bg">#1A64B5F6</color>
-    <color name="login_divider">#33FFFFFF</color>
+    <color name="login_badge_bg">#1A2438</color>
+    <color name="login_divider">#3364B5F6</color>
+    <color name="login_logo_glow_start">#401565C0</color>
+    <color name="login_logo_glow_end">#4000BCD4</color>
 </resources>

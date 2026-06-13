@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+class ApiException(val code: Int) : Exception("API error: $code")
+
 /**
  * Implementacja repozytorium — offline-first.
  * Room jako single source of truth, Retrofit jako remote source.
@@ -32,7 +34,7 @@ class RateRepositoryImpl @Inject constructor(
             val entities = remoteRates.map { it.toEntity(now) }
             dao.upsertRates(entities)
         } else {
-            throw Exception("API error: ${response.code()}")
+            throw ApiException(response.code())
         }
     }
 

@@ -27,6 +27,7 @@ class LoginFragment : Fragment() {
     private val viewModel: LoginViewModel by viewModels()
 
     private var isRegisterMode = false
+    private var hasNavigatedAfterLogin = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -48,7 +49,7 @@ class LoginFragment : Fragment() {
         updateThemeToggleIcon()
         binding.btnThemeToggle.setOnClickListener {
             ThemeHelper.toggleLightDark(requireContext())
-            updateThemeToggleIcon()
+            requireActivity().recreate()
         }
     }
 
@@ -98,8 +99,13 @@ class LoginFragment : Fragment() {
                     }
                     is LoginUiState.Success -> {
                         binding.progressIndicator.visibility = View.GONE
+                        if (hasNavigatedAfterLogin) return@collect
+                        hasNavigatedAfterLogin = true
                         viewModel.resetState()
-                        findNavController().navigate(R.id.action_loginFragment_to_dashboardFragment)
+                        val navController = findNavController()
+                        if (navController.currentDestination?.id == R.id.loginFragment) {
+                            navController.navigate(R.id.action_loginFragment_to_dashboardFragment)
+                        }
                     }
                     is LoginUiState.Error -> {
                         binding.progressIndicator.visibility = View.GONE
@@ -148,6 +154,7 @@ class LoginFragment : Fragment() {
             .setTitle("Zaloguj się biometrycznie")
             .setSubtitle("Użyj odcisku palca lub twarzy")
             .setNegativeButtonText("Użyj hasła")
+            .setAllowedAuthenticators(BIOMETRIC_STRONG)
             .build()
 
         val biometricPrompt = BiometricPrompt(this, executor,

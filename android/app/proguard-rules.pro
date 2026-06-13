@@ -47,6 +47,13 @@
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.firebase.**
 
+# ─── Gson (modele API) ───────────────────────────────────────────────────────
+-keep class com.przevolut.data.remote.model.** { *; }
+-keepattributes Signature
+
+# ─── MPAndroidChart ──────────────────────────────────────────────────────────
+-keep class com.github.mikephil.charting.** { *; }
+
 # ─── Ogólne ──────────────────────────────────────────────────────────────────
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception

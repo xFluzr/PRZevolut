@@ -2,6 +2,7 @@ package com.przevolut.ui.alerts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.przevolut.data.local.TokenManager
 import com.przevolut.data.remote.ApiService
 import com.przevolut.data.remote.model.AlertResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,28 +19,31 @@ sealed class AlertsUiState {
 
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AlertsUiState>(AlertsUiState.Loading)
     val uiState: StateFlow<AlertsUiState> = _uiState
 
-    // TODO: Token pobierać z SessionManager/EncryptedSharedPreferences
-    private var token: String = ""
+    private fun authHeader(): String? {
+        return tokenManager.getToken()?.let { "Bearer $it" }
+    }
 
     init {
         loadAlerts()
     }
 
     fun loadAlerts() {
-        if (token.isBlank()) {
+        val header = authHeader()
+        if (header == null) {
             _uiState.value = AlertsUiState.Error("Zaloguj się, aby zobaczyć alerty.")
             return
         }
         _uiState.value = AlertsUiState.Loading
         viewModelScope.launch {
             try {
-                val response = apiService.getAlerts("Bearer $token")
+                val response = apiService.getAlerts(header)
                 if (response.isSuccessful) {
                     _uiState.value = AlertsUiState.Success(response.body() ?: emptyList())
                 } else {
@@ -52,9 +56,10 @@ class AlertsViewModel @Inject constructor(
     }
 
     fun deleteAlert(alertId: Int) {
+        val header = authHeader() ?: return
         viewModelScope.launch {
             try {
-                val response = apiService.deleteAlert("Bearer $token", alertId)
+                val response = apiService.deleteAlert(header, alertId)
                 if (response.isSuccessful) {
                     loadAlerts()
                 }
@@ -65,14 +70,15 @@ class AlertsViewModel @Inject constructor(
     }
 
     fun createAlert(currency: String, direction: String, targetRate: Double) {
-        if (token.isBlank()) {
+        val header = authHeader()
+        if (header == null) {
             _uiState.value = AlertsUiState.Error("Zaloguj się, aby dodać alert.")
             return
         }
         viewModelScope.launch {
             try {
                 val response = apiService.createAlert(
-                    "Bearer $token",
+                    header,
                     com.przevolut.data.remote.model.AlertRequest(
                         currency = currency,
                         direction = direction,
@@ -88,10 +94,5 @@ class AlertsViewModel @Inject constructor(
                 _uiState.value = AlertsUiState.Error("Brak połączenia z serwerem.")
             }
         }
-    }
-
-    fun setToken(jwtToken: String) {
-        token = jwtToken
-        loadAlerts()
     }
 }

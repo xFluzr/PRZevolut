@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
+import com.przevolut.data.repository.ApiException
 import com.przevolut.domain.repository.RateRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -27,6 +28,10 @@ class RateSyncWorker @AssistedInject constructor(
                 Result.success()
             },
             onFailure = { e ->
+                if (e is ApiException && e.code == 401) {
+                    Log.w(TAG, "Pominięto synchronizację — brak ważnej sesji")
+                    return@fold Result.success()
+                }
                 Log.e(TAG, "Synchronizacja nieudana (próba $runAttemptCount)", e)
                 if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
             }

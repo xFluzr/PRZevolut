@@ -1,5 +1,16 @@
 import java.util.Properties
 
+fun normalizeBaseUrl(raw: String): String {
+    var url = raw.trim().trim('"')
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "http://$url"
+    }
+    if (!url.endsWith("/")) {
+        url = "$url/"
+    }
+    return url
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -30,7 +41,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        val baseUrl = localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com").trim('"')
+        val baseUrl = normalizeBaseUrl(
+            localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com")
+        )
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 

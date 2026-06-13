@@ -51,10 +51,14 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = apiService.register(RegisterRequest(email, password))
-                if (response.isSuccessful) {
-                    login(email, password)
-                } else {
-                    _uiState.value = LoginUiState.Error("Rejestracja nie powiodła się. E-mail może już być zajęty.")
+                when {
+                    response.isSuccessful -> login(email, password)
+                    response.code() == 409 -> _uiState.value = LoginUiState.Error(
+                        "Ten e-mail jest już zarejestrowany. Przełącz się na „Logowanie” i użyj swojego hasła."
+                    )
+                    else -> _uiState.value = LoginUiState.Error(
+                        "Rejestracja nie powiodła się. Spróbuj ponownie."
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.value = LoginUiState.Error("Brak połączenia z serwerem.")

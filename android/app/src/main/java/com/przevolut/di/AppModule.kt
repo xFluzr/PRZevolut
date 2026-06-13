@@ -74,10 +74,21 @@ object AppModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(normalizeBaseUrl(BuildConfig.BASE_URL))
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    private fun normalizeBaseUrl(raw: String): String {
+        var url = raw.trim()
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "http://$url"
+        }
+        if (!url.endsWith("/")) {
+            url = "$url/"
+        }
+        return url
     }
 
     @Provides
