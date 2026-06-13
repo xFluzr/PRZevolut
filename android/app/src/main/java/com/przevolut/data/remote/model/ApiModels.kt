@@ -45,6 +45,17 @@ data class RateResponse(
     @SerializedName("effective_date") val effectiveDate: String?
 )
 
+data class RateHistoryResponse(
+    val code: String,
+    val days: Int,
+    val history: List<RateHistoryPoint>
+)
+
+data class RateHistoryPoint(
+    val rate: Double,
+    @SerializedName("fetched_at") val fetchedAt: String
+)
+
 // ── Alerts ────────────────────────────────────────────────────────────────
 
 data class AlertRequest(

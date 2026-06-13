@@ -28,11 +28,16 @@
     <!-- Dashboard -->
     <string name="dashboard_greeting">Dzień dobry!</string>
     <string name="dashboard_date_format">%1$s</string>
-    <string name="dashboard_currencies_count">Śledzone waluty: %1$d</string>
-    <string name="dashboard_chart_title">Kursy walut do PLN</string>
-    <string name="dashboard_rates_list_title">Aktualne kursy</string>
+    <string name="dashboard_currencies_count">Na liście: %1$d walut</string>
+    <string name="dashboard_chart_title">Trend kursów (14 dni)</string>
+    <string name="dashboard_chart_subtitle">Ile złotych kosztuje 1 jednostka waluty</string>
+    <string name="dashboard_chart_hint">Dotknij waluty, aby dodać lub usunąć z wykresu i listy. Przeciągnij wykres palcem.</string>
+    <string name="dashboard_chart_empty">Za mało danych historycznych. Odśwież kursy i sprawdź ponownie jutro.</string>
+    <string name="dashboard_watchlist_label">Wybierz waluty do śledzenia</string>
+    <string name="dashboard_rates_list_title">Twoje kursy</string>
+    <string name="cd_currency_filter">Filtr walut na wykresie i liście</string>
+    <string name="cd_chart_rates">Wykres trendu kursów walut do złotówki</string>
     <string name="offline_banner">Tryb offline — kursy z %1$s</string>
-    <string name="cd_chart_rates">Wykres kursów walut</string>
     <string name="cd_rate_card">%1$s %2$s: kurs %3$s PLN</string>
     <string name="trend_placeholder">+0.12%%</string>
 

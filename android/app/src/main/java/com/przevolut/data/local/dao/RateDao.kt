@@ -37,6 +37,14 @@ interface RateDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertRate(rate: RateEntity)
 
+    /** Historia kursów jednej waluty (lokalne odświeżenia). */
+    @Query("""
+        SELECT * FROM exchange_rates 
+        WHERE currency = :currency 
+        ORDER BY fetchedAt ASC
+    """)
+    suspend fun getHistoryForCurrency(currency: String): List<RateEntity>
+
     /** Zapisuje listę kursów. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertRates(rates: List<RateEntity>)

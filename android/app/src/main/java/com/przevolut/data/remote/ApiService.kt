@@ -4,6 +4,7 @@ import com.przevolut.data.remote.model.AlertRequest
 import com.przevolut.data.remote.model.AlertResponse
 import com.przevolut.data.remote.model.LoginRequest
 import com.przevolut.data.remote.model.LoginResponse
+import com.przevolut.data.remote.model.RateHistoryResponse
 import com.przevolut.data.remote.model.RateResponse
 import com.przevolut.data.remote.model.RatesResponse
 import com.przevolut.data.remote.model.RegisterRequest
@@ -28,6 +29,12 @@ interface ApiService {
 
     @GET("rates")
     suspend fun getRates(): Response<RatesResponse>
+
+    @GET("rates/history")
+    suspend fun getRateHistory(
+        @Query("code") currency: String,
+        @Query("days") days: Int = 14
+    ): Response<RateHistoryResponse>
 
     @GET("rates/{currency}")
     suspend fun getRate(@Path("currency") currency: String): Response<RateResponse>

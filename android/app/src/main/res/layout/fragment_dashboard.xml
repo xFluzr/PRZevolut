@@ -93,13 +93,67 @@
                         android:textAppearance="?attr/textAppearanceTitleMedium"
                         android:textColor="?attr/colorOnSurface" />
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/bar_chart"
+                    <TextView
+                        android:id="@+id/tv_chart_subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:text="@string/dashboard_chart_subtitle"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <TextView
+                        android:id="@+id/tv_watchlist_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:text="@string/dashboard_watchlist_label"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:contentDescription="@string/cd_currency_filter"
+                        android:scrollbars="none">
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/chip_group_currencies"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:singleLine="true"
+                            app:singleSelection="false" />
+
+                    </HorizontalScrollView>
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/line_chart"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/chart_height"
                         android:layout_marginTop="@dimen/spacing_sm"
                         android:contentDescription="@string/cd_chart_rates"
                         android:importantForAccessibility="yes" />
+
+                    <TextView
+                        android:id="@+id/tv_chart_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:gravity="center"
+                        android:text="@string/dashboard_chart_empty"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tv_chart_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:text="@string/dashboard_chart_hint"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
