@@ -27,7 +27,6 @@ import android.view.MotionEvent
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.przevolut.R
-import com.przevolut.data.local.entity.RateEntity
 import com.przevolut.databinding.FragmentDashboardBinding
 import com.przevolut.ui.common.CurrencyUi
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,31 +56,20 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupHeader()
-        setupCurrencyChips()
         setupRecyclerView()
         setupChartInteraction()
         observeViewModel()
         binding.swipeRefresh.setOnRefreshListener { viewModel.refreshRates() }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.reloadWatchlist()
+    }
+
     private fun setupHeader() {
         val dateFormat = SimpleDateFormat("EEEE, d MMMM yyyy", Locale("pl", "PL"))
         binding.tvDate.text = dateFormat.format(Date())
-    }
-
-    private fun setupCurrencyChips() {
-        binding.chipGroupCurrencies.removeAllViews()
-        currencyChips.clear()
-        CurrencyUi.SUPPORTED.forEach { code ->
-            val chip = Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Filter).apply {
-                text = CurrencyUi.chipLabel(code)
-                isCheckable = true
-                isCheckedIconVisible = true
-                setOnClickListener { viewModel.toggleCurrency(code) }
-            }
-            currencyChips.add(chip to code)
-            binding.chipGroupCurrencies.addView(chip)
-        }
     }
 
     private fun setupRecyclerView() {
@@ -200,9 +188,62 @@ class DashboardFragment : Fragment() {
     }
 
     private fun updateCurrencyChips(watched: Set<String>) {
-        currencyChips.forEach { (chip, code) ->
-            chip.isChecked = code in watched
+        binding.chipGroupCurrencies.removeAllViews()
+        currencyChips.clear()
+        
+        val defaultCurrency = viewModel.getDefaultCurrency()
+        val sortedWatched = watched.toList().sortedWith(compareBy({ it != defaultCurrency }, { it }))
+        sortedWatched.forEach { code ->
+            val isDefault = (code == defaultCurrency)
+            val chip = Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Assist).apply {
+                text = CurrencyUi.chipLabel(code)
+                isCheckable = false
+                
+                if (!isDefault) {
+                    isCloseIconVisible = true
+                    setOnCloseIconClickListener { viewModel.toggleCurrency(code) }
+                } else {
+                    isCloseIconVisible = false
+                    setOnClickListener {
+                        Snackbar.make(binding.root, "Domyślnej waluty nie można usunąć.", Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            currencyChips.add(chip to code)
+            binding.chipGroupCurrencies.addView(chip)
         }
+        
+        val addChip = Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Assist).apply {
+            text = getString(R.string.dashboard_add_currency)
+            setOnClickListener { showAddCurrencyDialog(watched) }
+        }
+        binding.chipGroupCurrencies.addView(addChip)
+    }
+
+    private fun showAddCurrencyDialog(watched: Set<String>) {
+        val allCodes = CurrencyUi.SUPPORTED.toTypedArray()
+        val checkedItems = allCodes.map { it in watched }.toBooleanArray()
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dashboard_watchlist_label)
+            .setMultiChoiceItems(
+                allCodes.map { CurrencyUi.chipLabel(it) }.toTypedArray(),
+                checkedItems
+            ) { dialog, which, isChecked ->
+                if (allCodes[which] == viewModel.getDefaultCurrency() && !isChecked) {
+                    (dialog as? androidx.appcompat.app.AlertDialog)?.listView?.setItemChecked(which, true)
+                    checkedItems[which] = true
+                    Snackbar.make(binding.root, "Domyślnej waluty nie można usunąć.", Snackbar.LENGTH_SHORT).show()
+                } else {
+                    checkedItems[which] = isChecked
+                }
+            }
+            .setPositiveButton(R.string.dialog_confirm_save) { _, _ ->
+                val newWatched = allCodes.filterIndexed { index, _ -> checkedItems[index] }.toSet()
+                viewModel.setWatchedCurrencies(newWatched)
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
     }
 
     private fun setupChart(series: Map<String, List<ChartPoint>>) {

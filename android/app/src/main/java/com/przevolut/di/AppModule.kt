@@ -55,7 +55,17 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
+        val customLogger = object : HttpLoggingInterceptor.Logger {
+            override fun log(message: String) {
+                val maskedMessage = message
+                    .replace(Regex("\"password\"\\s*:\\s*\"[^\"]+\""), "\"password\":\"***\"")
+                    .replace(Regex("\"current_password\"\\s*:\\s*\"[^\"]+\""), "\"current_password\":\"***\"")
+                    .replace(Regex("\"new_password\"\\s*:\\s*\"[^\"]+\""), "\"new_password\":\"***\"")
+                android.util.Log.d("OkHttp", maskedMessage)
+            }
+        }
+
+        val logging = HttpLoggingInterceptor(customLogger).apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
             } else {

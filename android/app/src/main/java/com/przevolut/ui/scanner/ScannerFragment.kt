@@ -204,9 +204,9 @@ class ScannerFragment : Fragment() {
             .addOnSuccessListener { visionText ->
                 if (!isBindingActive()) return@addOnSuccessListener
 
-                val raw = visionText.text
-                if (raw.isNotBlank()) {
-                    viewModel.processOcrResult(raw)
+                val reconstructedText = PriceDetector.reconstructVisionText(visionText)
+                if (reconstructedText.isNotBlank()) {
+                    viewModel.processOcrResult(reconstructedText)
 
                     val detectedPrices = PriceDetector.detect(visionText, imageWidth, imageHeight)
                     val rates = viewModel.ratesMap.value

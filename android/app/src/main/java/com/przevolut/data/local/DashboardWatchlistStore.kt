@@ -13,13 +13,20 @@ class DashboardWatchlistStore @Inject constructor(
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun getWatchedCurrencies(): Set<String> {
-        val saved = prefs.getStringSet(KEY_CURRENCIES, null)
-        return saved?.toSet() ?: DEFAULT_CURRENCIES
+        val saved = prefs.getStringSet(KEY_CURRENCIES, null) ?: emptySet()
+        val defaultCurrency = getDefaultCurrency()
+        return saved.toSet() + defaultCurrency
     }
 
     fun saveWatchedCurrencies(currencies: Set<String>) {
-        val normalized = if (currencies.isEmpty()) DEFAULT_CURRENCIES else currencies
+        val defaultCurrency = getDefaultCurrency()
+        val normalized = currencies + defaultCurrency
         prefs.edit { putStringSet(KEY_CURRENCIES, normalized) }
+    }
+
+    fun getDefaultCurrency(): String {
+        return context.getSharedPreferences("przevolut_prefs", Context.MODE_PRIVATE)
+            .getString("default_currency", "EUR") ?: "EUR"
     }
 
     companion object {

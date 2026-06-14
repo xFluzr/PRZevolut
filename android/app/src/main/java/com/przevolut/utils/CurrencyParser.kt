@@ -24,7 +24,7 @@ object CurrencyParser {
         "Kc" to "CZK", // OCR czasem myli "č"
     )
 
-    private val CURRENCY_CODES = setOf("EUR", "USD", "GBP", "CHF", "CZK", "HUF", "SEK", "NOK", "DKK")
+    private val CURRENCY_CODES = setOf("EUR", "USD", "GBP", "CHF", "CZK", "HUF", "SEK", "NOK", "DKK", "UAH", "RON", "TRY", "ISK")
 
     // Kwota: liczba z separatorem dziesiętnym (obowiązkowym) lub liczba całkowita >= 2 cyfry
     // Grupowanie tysięcy (spacja / kropka / przecinek) obsługiwane opcjonalnie
@@ -34,7 +34,7 @@ object CurrencyParser {
     private val SYMBOL_PATTERN = """([€£$]|Fr|fr|Kč|Kc)"""
 
     // Kody ISO walut
-    private val CODE_PATTERN = """(EUR|USD|GBP|CHF|CZK|HUF|SEK|NOK|DKK)"""
+    private val CODE_PATTERN = """(EUR|USD|GBP|CHF|CZK|HUF|SEK|NOK|DKK|UAH|RON|TRY|ISK)"""
 
     // Wzorzec 1: symbol przed kwotą — "€12,99" / "$ 49.99"
     private val SYMBOL_BEFORE = Regex("""$SYMBOL_PATTERN\s*$AMOUNT_PATTERN""")

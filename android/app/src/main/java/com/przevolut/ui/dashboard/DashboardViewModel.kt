@@ -62,6 +62,15 @@ class DashboardViewModel @Inject constructor(
         refreshRates()
     }
 
+    fun reloadWatchlist() {
+        val latestWatchlist = watchlistStore.getWatchedCurrencies()
+        if (latestWatchlist != watchedCurrencies) {
+            watchedCurrencies = latestWatchlist.toMutableSet()
+            publishSuccess()
+            loadChartData()
+        }
+    }
+
     fun refreshRates() {
         viewModelScope.launch {
             try {
@@ -91,9 +100,11 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun toggleCurrency(currency: String) {
+        if (currency == watchlistStore.getDefaultCurrency()) return
+
         watchedCurrencies = watchedCurrencies.toMutableSet().apply {
             if (contains(currency)) {
-                if (size > 1) remove(currency)
+                remove(currency)
             } else {
                 add(currency)
             }
@@ -103,12 +114,23 @@ class DashboardViewModel @Inject constructor(
         loadChartData()
     }
 
+    fun setWatchedCurrencies(currencies: Set<String>) {
+        if (currencies.isNotEmpty()) {
+            watchedCurrencies = currencies.toMutableSet()
+            watchlistStore.saveWatchedCurrencies(watchedCurrencies)
+            publishSuccess()
+            loadChartData()
+        }
+    }
+
+    fun getDefaultCurrency(): String = watchlistStore.getDefaultCurrency()
+
     fun isCurrencyWatched(currency: String): Boolean = currency in watchedCurrencies
 
     private fun publishSuccess() {
         val filtered = latestRates
             .filter { it.currency in watchedCurrencies }
-            .sortedBy { it.currency }
+            .sortedWith(compareBy({ it.currency != watchlistStore.getDefaultCurrency() }, { it.currency }))
         val current = _uiState.value
         val chartSeries = if (current is DashboardUiState.Success) current.chartSeries else emptyMap()
         _uiState.value = DashboardUiState.Success(
@@ -128,7 +150,7 @@ class DashboardViewModel @Inject constructor(
             }
             val filtered = latestRates
                 .filter { it.currency in watchedCurrencies }
-                .sortedBy { it.currency }
+                .sortedWith(compareBy({ it.currency != watchlistStore.getDefaultCurrency() }, { it.currency }))
             _uiState.value = DashboardUiState.Success(
                 rates = filtered,
                 watchedCurrencies = watchedCurrencies,

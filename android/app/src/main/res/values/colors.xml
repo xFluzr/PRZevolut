@@ -47,6 +47,14 @@
     <color name="currency_gbp">#6A1B9A</color>
     <color name="currency_chf">#E65100</color>
     <color name="currency_czk">#00838F</color>
+    <color name="currency_huf">#D32F2F</color>
+    <color name="currency_uah">#1976D2</color>
+    <color name="currency_dkk">#C62828</color>
+    <color name="currency_isk">#0D47A1</color>
+    <color name="currency_nok">#0277BD</color>
+    <color name="currency_sek">#FBC02D</color>
+    <color name="currency_ron">#FF8F00</color>
+    <color name="currency_try">#C2185B</color>
 
     <!-- Scanner -->
     <color name="overlay_background">#CC000000</color>

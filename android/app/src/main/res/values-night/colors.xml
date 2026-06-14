@@ -40,6 +40,14 @@
     <color name="currency_gbp">#BA68C8</color>
     <color name="currency_chf">#FFB74D</color>
     <color name="currency_czk">#4DD0E1</color>
+    <color name="currency_huf">#EF5350</color>
+    <color name="currency_uah">#42A5F5</color>
+    <color name="currency_dkk">#E53935</color>
+    <color name="currency_isk">#1976D2</color>
+    <color name="currency_nok">#29B6F6</color>
+    <color name="currency_sek">#FFF176</color>
+    <color name="currency_ron">#FFB300</color>
+    <color name="currency_try">#F06292</color>
 
     <color name="overlay_background">#CC000000</color>
     <color name="overlay_scrim">#AA000000</color>

@@ -15,14 +15,14 @@ object PriceDetector {
         "Fr" to "CHF", "Kč" to "CZK"
     )
     private val CURRENCY_CODES = setOf(
-        "EUR", "USD", "GBP", "CHF", "CZK", "HUF", "SEK", "NOK", "DKK"
+        "EUR", "USD", "GBP", "CHF", "CZK", "HUF", "SEK", "NOK", "DKK", "UAH", "RON", "TRY", "ISK"
     )
 
     private val PRICE_PATTERN = Regex(
         """([€$£]|Fr|Kč)?\s*(\d{1,7}[.,]\d{2})\s*([€$£]|Fr|Kč)?"""
     )
     private val CODE_PATTERN = Regex(
-        """(EUR|USD|GBP|CHF|CZK|HUF|SEK|NOK|DKK)\s*(\d{1,7}[.,]\d{2})|(\d{1,7}[.,]\d{2})\s*(EUR|USD|GBP|CHF|CZK|HUF|SEK|NOK|DKK)"""
+        """(EUR|USD|GBP|CHF|CZK|HUF|SEK|NOK|DKK|UAH|RON|TRY|ISK)\s*(\d{1,7}[.,]\d{2})|(\d{1,7}[.,]\d{2})\s*(EUR|USD|GBP|CHF|CZK|HUF|SEK|NOK|DKK|UAH|RON|TRY|ISK)"""
     )
 
     fun detect(
@@ -34,7 +34,7 @@ object PriceDetector {
 
         for (block in visionText.textBlocks) {
             for (line in block.lines) {
-                val lineText = line.text
+                val lineText = reconstructLineText(line)
                 val lineBox = line.boundingBox ?: continue
 
                 // Szukaj cen z symbolami walut
@@ -98,5 +98,49 @@ object PriceDetector {
         }
 
         return results.distinctBy { "${it.amount}_${it.currency}" }
+    }
+
+    fun reconstructVisionText(visionText: Text): String {
+        val sb = java.lang.StringBuilder()
+        for (block in visionText.textBlocks) {
+            for (line in block.lines) {
+                sb.append(reconstructLineText(line)).append("\n")
+            }
+        }
+        return sb.toString()
+    }
+
+    private fun reconstructLineText(line: Text.Line): String {
+        var text = line.text
+        val elements = line.elements
+        for (i in 0 until elements.size - 1) {
+            val prev = elements[i]
+            val curr = elements[i + 1]
+            val prevBox = prev.boundingBox
+            val currBox = curr.boundingBox
+            
+            if (prevBox != null && currBox != null) {
+                val prevHeight = prevBox.bottom - prevBox.top
+                val currHeight = currBox.bottom - currBox.top
+                
+                val prevEndsWithDigit = prev.text.lastOrNull()?.isDigit() == true
+                val currStartsWithDigit = curr.text.firstOrNull()?.isDigit() == true
+
+                // Jeśli poprzedni blok jest dużo większy niż obecny, a oba są cyframi,
+                // ML Kit mógł zgubić kropkę pomiędzy nimi ze względu na inny styl/wielkość.
+                if (prevEndsWithDigit && currStartsWithDigit && prevHeight > 1.25f * currHeight) {
+                    val withoutSpace = "${prev.text}${curr.text}"
+                    val withSpace = "${prev.text} ${curr.text}"
+                    val replacement = "${prev.text}.${curr.text}"
+                    
+                    if (text.contains(withSpace)) {
+                        text = text.replaceFirst(withSpace, replacement)
+                    } else if (text.contains(withoutSpace)) {
+                        text = text.replaceFirst(withoutSpace, replacement)
+                    }
+                }
+            }
+        }
+        return text
     }
 }

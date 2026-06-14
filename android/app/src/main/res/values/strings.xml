@@ -35,6 +35,7 @@
     <string name="dashboard_chart_axis_hint">Oś X: dzień · Oś Y: kurs PLN</string>
     <string name="dashboard_chart_empty">Brak historii wykresu. Na telefonie ustaw BASE_URL na IP komputera w Wi‑Fi (nie 10.0.2.2), potem odśwież.</string>
     <string name="dashboard_watchlist_label">Wybierz waluty do śledzenia</string>
+    <string name="dashboard_add_currency">+ Dodaj</string>
     <string name="dashboard_rates_list_title">Twoje kursy</string>
     <string name="cd_currency_filter">Filtr walut na wykresie i liście</string>
     <string name="cd_chart_rates">Wykres trendu kursów walut do złotówki</string>
@@ -121,4 +122,12 @@
     <string name="currency_gbp">Funt szterling</string>
     <string name="currency_chf">Frank szwajcarski</string>
     <string name="currency_czk">Korona czeska</string>
+    <string name="currency_huf">Forint węgierski</string>
+    <string name="currency_uah">Hrywna ukraińska</string>
+    <string name="currency_dkk">Korona duńska</string>
+    <string name="currency_isk">Korona islandzka</string>
+    <string name="currency_nok">Korona norweska</string>
+    <string name="currency_sek">Korona szwedzka</string>
+    <string name="currency_ron">Lej rumuński</string>
+    <string name="currency_try">Lira turecka</string>
 </resources>
