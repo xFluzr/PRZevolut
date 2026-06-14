@@ -195,7 +195,7 @@ class LoginFragment : Fragment() {
     private fun setupBiometricIfAvailable() {
         val prefs = requireContext().getSharedPreferences("przevolut_prefs", Context.MODE_PRIVATE)
         val biometricEnabled = prefs.getBoolean("biometric_enabled", false)
-        val hasSavedSession = tokenManager.isLoggedIn()
+        val hasSavedSession = tokenManager.isSessionAvailable()
 
         val biometricManager = BiometricManager.from(requireContext())
         val canAuthenticate = biometricManager.canAuthenticate(BIOMETRIC_STRONG)
@@ -208,7 +208,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun showBiometricPrompt() {
-        if (!tokenManager.isLoggedIn()) {
+        if (!tokenManager.isSessionAvailable()) {
             Snackbar.make(
                 binding.cardLogin,
                 "Najpierw zaloguj się hasłem.",

@@ -43,6 +43,7 @@ class AlertsFragment : Fragment() {
         observeViewModel()
         setupInsets()
         binding.btnAddAlert.setOnClickListener { showAlertDialog() }
+        binding.fabAddAlert.setOnClickListener { showAlertDialog() }
         binding.swipeRefresh.setOnRefreshListener { viewModel.loadAlerts() }
     }
 
@@ -95,46 +96,61 @@ class AlertsFragment : Fragment() {
         val defaultCurrency = viewModel.getDefaultCurrency()
         val sortedWatched = watched.toList().sortedWith(compareBy({ it != defaultCurrency }, { it }))
         
-        val currencyChips = mutableListOf<Pair<com.google.android.material.chip.Chip, String>>()
+        val isEdit = existing != null
+        
+        // IMPORTANT: Set selection mode BEFORE adding chips
+        dialogBinding.chipGroupCurrency.isSingleSelection = isEdit
+        dialogBinding.chipGroupCurrency.isSelectionRequired = true
         dialogBinding.chipGroupCurrency.removeAllViews()
         
+        val currencyChips = mutableListOf<Pair<com.google.android.material.chip.Chip, String>>()
+        
         sortedWatched.forEach { code ->
-            val chip = com.google.android.material.chip.Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Filter).apply {
+            val chip = com.google.android.material.chip.Chip(requireContext()).apply {
                 text = CurrencyUi.chipLabel(code)
                 isCheckable = true
-                isCheckedIconVisible = false
+                isCheckedIconVisible = true
+                isClickable = true
+                isFocusable = true
                 id = View.generateViewId()
             }
             currencyChips.add(chip to code)
             dialogBinding.chipGroupCurrency.addView(chip)
         }
 
-        var selectedCurrency = existing?.currency ?: defaultCurrency
-        // Upewnij się, że wybrana waluta jest faktycznie na liście chipów (np. jeśli usunęliśmy z obserwowanych)
-        if (selectedCurrency !in watched) {
-            selectedCurrency = defaultCurrency
-        }
+        val selectedCurrencies = mutableListOf<String>()
         var selectedDirection = existing?.direction ?: "above"
 
-        if (existing != null) {
-            dialogBinding.chipGroupCurrency.isEnabled = false
+        if (isEdit) {
             currencyChips.forEach { (chip, code) ->
-                chip.isChecked = code == existing.currency
+                chip.isEnabled = false
+                if (code == existing!!.currency) {
+                    chip.isChecked = true
+                    selectedCurrencies.add(code)
+                }
             }
-            dialogBinding.etThreshold.setText("%.4f".format(existing.threshold))
+            dialogBinding.etThreshold.setText("%.4f".format(existing!!.threshold))
             if (existing.direction == "below") {
                 dialogBinding.btnBelow.isChecked = true
             } else {
                 dialogBinding.btnAbove.isChecked = true
             }
         } else {
-            currencyChips.find { it.second == defaultCurrency }?.first?.isChecked = true
+            val initialCurrency = if (defaultCurrency in watched) defaultCurrency else watched.firstOrNull()
+            if (initialCurrency != null) {
+                currencyChips.find { it.second == initialCurrency }?.first?.isChecked = true
+                selectedCurrencies.add(initialCurrency)
+            }
             dialogBinding.btnAbove.isChecked = true
         }
 
         dialogBinding.chipGroupCurrency.setOnCheckedStateChangeListener { _, checkedIds ->
-            val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
-            selectedCurrency = currencyChips.first { it.first.id == checkedId }.second
+            selectedCurrencies.clear()
+            checkedIds.forEach { checkedId ->
+                currencyChips.find { it.first.id == checkedId }?.second?.let {
+                    selectedCurrencies.add(it)
+                }
+            }
         }
 
         dialogBinding.toggleDirection.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -146,7 +162,6 @@ class AlertsFragment : Fragment() {
             }
         }
 
-        val isEdit = existing != null
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (isEdit) R.string.dialog_edit_alert_title else R.string.dialog_add_alert_title)
             .setView(dialogBinding.root)
@@ -178,7 +193,9 @@ class AlertsFragment : Fragment() {
                     if (isEdit) {
                         viewModel.updateAlert(existing!!.id, selectedDirection, threshold)
                     } else {
-                        viewModel.createAlert(selectedCurrency, selectedDirection, threshold)
+                        if (selectedCurrencies.isNotEmpty()) {
+                            viewModel.createAlerts(selectedCurrencies, selectedDirection, threshold)
+                        }
                     }
                     dialog.dismiss()
                 }
@@ -213,6 +230,7 @@ class AlertsFragment : Fragment() {
                         val isEmpty = state.alerts.isEmpty()
                         binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
                         binding.rvAlerts.visibility = if (isEmpty) View.GONE else View.VISIBLE
+                        binding.fabAddAlert.visibility = if (isEmpty) View.GONE else View.VISIBLE
                         if (isEmpty) {
                             binding.tvEmpty.text = getString(R.string.no_alerts_body) +
                                 "\n\n" + getString(R.string.alerts_tap_to_edit)

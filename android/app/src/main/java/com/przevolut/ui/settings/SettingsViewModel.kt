@@ -50,9 +50,8 @@ class SettingsViewModel @Inject constructor(
             _settings.value = _settings.value.copy(
                 isLoggedIn = false,
                 userEmail = null,
-                biometricEnabled = false
+                biometricEnabled = prefs.getBoolean("biometric_enabled", false)
             )
-            prefs.edit().putBoolean("biometric_enabled", false).apply()
             return
         }
 
@@ -130,8 +129,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun logout() {
-        tokenManager.clearToken()
-        prefs.edit().putBoolean("biometric_enabled", false).apply()
+        tokenManager.softLogout()
         _settings.value = loadSettings()
         viewModelScope.launch {
             _events.emit(SettingsEvent.LoggedOut)

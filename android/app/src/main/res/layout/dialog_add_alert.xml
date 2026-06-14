@@ -15,22 +15,15 @@
         android:textAppearance="?attr/textAppearanceLabelLarge"
         android:textColor="?attr/colorOnSurface" />
 
-    <HorizontalScrollView
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_currency"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
         android:layout_marginTop="@dimen/spacing_sm"
-        android:layout_marginBottom="@dimen/spacing_md">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:selectionRequired="true"
-            app:singleLine="true"
-            app:singleSelection="true">
-        </com.google.android.material.chip.ChipGroup>
-    </HorizontalScrollView>
+        android:layout_marginBottom="@dimen/spacing_md"
+        app:selectionRequired="true"
+        app:singleLine="false"
+        app:singleSelection="false" />
 
     <TextView
         android:id="@+id/label_direction"

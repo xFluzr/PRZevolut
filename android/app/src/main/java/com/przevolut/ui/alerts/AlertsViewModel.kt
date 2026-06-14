@@ -98,6 +98,31 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
+    fun createAlerts(currencies: List<String>, direction: String, threshold: Double) {
+        if (tokenManager.getToken() == null) {
+            _uiState.value = AlertsUiState.Error("Zaloguj się, aby dodać alert.")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                var successCount = 0
+                for (currency in currencies) {
+                    val response = apiService.createAlert(
+                        AlertRequest(currency = currency, direction = direction, threshold = threshold)
+                    )
+                    if (response.isSuccessful) successCount++
+                }
+                if (successCount > 0) {
+                    loadAlerts()
+                } else {
+                    _uiState.value = AlertsUiState.Error("Nie udało się utworzyć alertów.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = AlertsUiState.Error("Brak połączenia z serwerem.")
+            }
+        }
+    }
+
     fun updateAlert(alertId: Int, direction: String, threshold: Double) {
         if (tokenManager.getToken() == null) return
         viewModelScope.launch {

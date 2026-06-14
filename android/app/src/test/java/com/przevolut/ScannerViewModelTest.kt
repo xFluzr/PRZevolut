@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.*
 import org.junit.Assert.*
@@ -23,7 +24,7 @@ class ScannerViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @MockK
     lateinit var rateDao: RateDao
@@ -34,7 +35,9 @@ class ScannerViewModelTest {
     fun setUp() {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        
+
+        every { rateDao.getLatestRates() } returns flowOf(emptyList())
+
         viewModel = ScannerViewModel(rateDao)
     }
 
@@ -44,7 +47,7 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `processOcrResult with valid EUR text updates scanResult`() = runTest {
+    fun `processOcrResult with valid EUR text updates scanResult`() = runTest(testDispatcher) {
         val eurRate = RateEntity(
             currency = "EUR", rate = 4.25, mid = 4.25,
             effectiveDate = "2026-05-04", fetchedAt = System.currentTimeMillis()
@@ -52,7 +55,8 @@ class ScannerViewModelTest {
         coEvery { rateDao.getLatestRate("EUR") } returns eurRate
 
         viewModel.processOcrResult("€ 12,99")
-        testDispatcher.scheduler.advanceUntilIdle()
+        advanceTimeBy(500)
+        advanceUntilIdle()
 
         val result = viewModel.scanResult.first()
         assertNotNull(result)
@@ -62,11 +66,12 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `processOcrResult with no rate in DB returns null convertedAmount`() = runTest {
+    fun `processOcrResult with no rate in DB returns null convertedAmount`() = runTest(testDispatcher) {
         coEvery { rateDao.getLatestRate(any()) } returns null
 
         viewModel.processOcrResult("€ 10,00")
-        testDispatcher.scheduler.advanceUntilIdle()
+        advanceTimeBy(500)
+        advanceUntilIdle()
 
         val result = viewModel.scanResult.first()
         assertNotNull(result)
@@ -74,9 +79,10 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `processOcrResult with unrecognizable text leaves scanResult null`() = runTest {
+    fun `processOcrResult with unrecognizable text leaves scanResult null`() = runTest(testDispatcher) {
         viewModel.processOcrResult("Lorem ipsum dolor")
-        testDispatcher.scheduler.advanceUntilIdle()
+        advanceTimeBy(500)
+        advanceUntilIdle()
 
         val result = viewModel.scanResult.first()
         assertNull(result)

@@ -94,4 +94,19 @@
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_alert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:layout_marginBottom="@dimen/fab_margin_above_bottom_nav"
+        android:contentDescription="@string/fab_add_alert"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_add"
+        app:tint="?attr/colorOnPrimaryContainer"
+        app:backgroundTint="?attr/colorPrimaryContainer" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

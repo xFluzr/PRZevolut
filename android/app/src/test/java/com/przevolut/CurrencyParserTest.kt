@@ -95,4 +95,46 @@ class CurrencyParserTest {
         val result = CurrencyParser.parse("100 JPY")
         assertNull(result)
     }
+
+    // ── Testy superscriptu (grosze w indeksie górnym) ────────────────────
+
+    @Test
+    fun `parse dollar superscript cents 393 as 3_93`() {
+        val result = CurrencyParser.parse("\$393")
+        assertNotNull(result)
+        assertEquals("USD", result!!.second)
+        assertEquals(3.93, result.first, 0.001)
+    }
+
+    @Test
+    fun `parse dollar superscript cents 1488 as 14_88`() {
+        val result = CurrencyParser.parse("\$1488")
+        assertNotNull(result)
+        assertEquals("USD", result!!.second)
+        assertEquals(14.88, result.first, 0.001)
+    }
+
+    @Test
+    fun `parse euro superscript cents 1499 as 14_99`() {
+        val result = CurrencyParser.parse("€1499")
+        assertNotNull(result)
+        assertEquals("EUR", result!!.second)
+        assertEquals(14.99, result.first, 0.001)
+    }
+
+    @Test
+    fun `parse superscript with space between symbol and number`() {
+        val result = CurrencyParser.parse("\$ 698")
+        assertNotNull(result)
+        assertEquals("USD", result!!.second)
+        assertEquals(6.98, result.first, 0.001)
+    }
+
+    @Test
+    fun `normal decimal takes priority over superscript fallback`() {
+        val result = CurrencyParser.parse("\$3.93")
+        assertNotNull(result)
+        assertEquals("USD", result!!.second)
+        assertEquals(3.93, result.first, 0.001)
+    }
 }

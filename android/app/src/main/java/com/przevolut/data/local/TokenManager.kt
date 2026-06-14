@@ -12,7 +12,12 @@ class TokenManager @Inject constructor(
 ) {
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
-    fun saveToken(token: String) = prefs.edit { putString(KEY_TOKEN, token) }
+    fun saveToken(token: String) {
+        prefs.edit {
+            putString(KEY_TOKEN, token)
+            putBoolean(KEY_SESSION_ACTIVE, true)
+        }
+    }
 
     fun saveUserEmail(email: String) = prefs.edit { putString(KEY_EMAIL, email) }
 
@@ -23,12 +28,22 @@ class TokenManager @Inject constructor(
     fun clearToken() = prefs.edit {
         remove(KEY_TOKEN)
         remove(KEY_EMAIL)
+        remove(KEY_SESSION_ACTIVE)
     }
 
-    fun isLoggedIn(): Boolean = getToken() != null
+    fun softLogout() = prefs.edit {
+        putBoolean(KEY_SESSION_ACTIVE, false)
+    }
+
+    fun isLoggedIn(): Boolean = getToken() != null && prefs.getBoolean(KEY_SESSION_ACTIVE, false)
+
+    fun isSessionAvailable(): Boolean = getToken() != null
+
+    fun setSessionActive(active: Boolean) = prefs.edit { putBoolean(KEY_SESSION_ACTIVE, active) }
 
     companion object {
         private const val KEY_TOKEN = "access_token"
         private const val KEY_EMAIL = "user_email"
+        private const val KEY_SESSION_ACTIVE = "session_active"
     }
 }

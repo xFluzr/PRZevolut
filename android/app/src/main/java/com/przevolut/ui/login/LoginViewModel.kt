@@ -70,6 +70,7 @@ class LoginViewModel @Inject constructor(
     fun loginWithBiometric() {
         val token = tokenManager.getToken()
         if (token != null) {
+            tokenManager.setSessionActive(true)
             _uiState.value = LoginUiState.Success(token)
         } else {
             _uiState.value = LoginUiState.Error("Brak zapisanych danych logowania. Zaloguj się hasłem.")

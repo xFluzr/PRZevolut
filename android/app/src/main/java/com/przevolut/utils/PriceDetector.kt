@@ -159,9 +159,27 @@ object PriceDetector {
         return virtualLines
     }
 
+    /**
+     * Sprawdza czy element curr jest superscriptem wzgl. prev na podstawie:
+     * 1. Różnicy wysokości (curr mniejszy o >= 15%)
+     * 2. Pozycji pionowej (dół curr jest powyżej 70% wysokości prev)
+     */
+    private fun isSuperscript(
+        prevBox: android.graphics.Rect, currBox: android.graphics.Rect
+    ): Boolean {
+        val prevHeight = prevBox.bottom - prevBox.top
+        val currHeight = currBox.bottom - currBox.top
+        val isSmallerHeight = prevHeight > 1.15f * currHeight
+        val isPositionedHigher = currBox.bottom < prevBox.top + prevHeight * 0.75f
+        return isSmallerHeight || isPositionedHigher
+    }
+
     private fun reconstructVirtualLineText(vLine: VirtualLine): String {
         var text = vLine.elements.joinToString(" ") { it.text }
+        var decimalInserted = false
         
+        // 1) Symbol-level: szukaj superscriptu wewnątrz pojedynczego elementu
+        //    np. ML Kit scalił "3" i "93" w jedno słowo "393"
         for (element in vLine.elements) {
             val symbols = element.symbols
             for (i in 0 until symbols.size - 1) {
@@ -171,17 +189,15 @@ object PriceDetector {
                 val currBox = curr.boundingBox
                 
                 if (prevBox != null && currBox != null) {
-                    val prevHeight = prevBox.bottom - prevBox.top
-                    val currHeight = currBox.bottom - currBox.top
-                    
                     val prevIsDigit = prev.text.firstOrNull()?.isDigit() == true
                     val currIsDigit = curr.text.firstOrNull()?.isDigit() == true
                     
-                    if (prevIsDigit && currIsDigit && prevHeight > 1.25f * currHeight) {
+                    if (prevIsDigit && currIsDigit && isSuperscript(prevBox, currBox)) {
                         val originalElementText = element.text
                         if (originalElementText.length == symbols.size) {
                             val newElementText = originalElementText.substring(0, i + 1) + "." + originalElementText.substring(i + 1)
                             text = text.replaceFirst(originalElementText, newElementText)
+                            decimalInserted = true
                         }
                         break
                     }
@@ -189,6 +205,8 @@ object PriceDetector {
             }
         }
 
+        // 2) Element-level: szukaj superscriptu pomiędzy oddzielnymi elementami
+        //    np. ML Kit rozdzielił na "6" i "98"
         val elements = vLine.elements
         for (i in 0 until elements.size - 1) {
             val prev = elements[i]
@@ -197,25 +215,47 @@ object PriceDetector {
             val currBox = curr.boundingBox
             
             if (prevBox != null && currBox != null) {
-                val prevHeight = prevBox.bottom - prevBox.top
-                val currHeight = currBox.bottom - currBox.top
-                
                 val prevEndsWithDigit = prev.text.lastOrNull()?.isDigit() == true
                 val currStartsWithDigit = curr.text.firstOrNull()?.isDigit() == true
 
-                if (prevEndsWithDigit && currStartsWithDigit && prevHeight > 1.25f * currHeight) {
+                if (prevEndsWithDigit && currStartsWithDigit && isSuperscript(prevBox, currBox)) {
                     val withoutSpace = "${prev.text}${curr.text}"
                     val withSpace = "${prev.text} ${curr.text}"
                     val replacement = "${prev.text}.${curr.text}"
                     
                     if (text.contains(withSpace)) {
                         text = text.replaceFirst(withSpace, replacement)
+                        decimalInserted = true
                     } else if (text.contains(withoutSpace)) {
                         text = text.replaceFirst(withoutSpace, replacement)
+                        decimalInserted = true
                     }
                 }
             }
         }
+
+        // 3) Fallback: jeśli bounding boxy nie zadziałały, ale mamy
+        //    symbol waluty + 3+ cyfr BEZ separatora dziesiętnego →
+        //    wstaw kropkę przed ostatnimi 2 cyframi.
+        //    Np. "$393" → "$3.93", "$1488" → "$14.88"
+        //    W retailu ceny ZAWSZE mają grosze, więc to bezpieczna heurystyka.
+        if (!decimalInserted) {
+            text = SUPERSCRIPT_FALLBACK_BEFORE.replace(text) { m ->
+                "${m.groupValues[1]}${m.groupValues[2]}.${m.groupValues[3]}"
+            }
+            text = SUPERSCRIPT_FALLBACK_AFTER.replace(text) { m ->
+                "${m.groupValues[1]}.${m.groupValues[2]}${m.groupValues[3]}"
+            }
+        }
+
         return text
     }
+
+    // Symbol waluty + 3+ cyfr bez kropki → wstaw kropkę przed ostatnimi 2 cyframi
+    private val SUPERSCRIPT_FALLBACK_BEFORE = Regex(
+        """([€$£]|Fr|Kč)\s*(\d+)(\d{2})(?!\d|[.,]\d)"""
+    )
+    private val SUPERSCRIPT_FALLBACK_AFTER = Regex(
+        """(?<!\d[.,])(\d+)(\d{2})\s*([€$£]|Fr|Kč)"""
+    )
 }
