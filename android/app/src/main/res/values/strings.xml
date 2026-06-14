@@ -118,14 +118,6 @@
     <string name="settings_font_normal">Normalny</string>
     <string name="settings_font_large">Duży</string>
     <string name="settings_font_xlarge">Bardzo duży</string>
-    <string name="settings_high_contrast_label">Wysoki kontrast</string>
-    <string name="settings_high_contrast_hint">Zwiększa kontrast kolorów dla lepszej czytelności</string>
-    <string name="cd_high_contrast_switch">Włącz lub wyłącz tryb wysokiego kontrastu</string>
-    <string name="settings_colorblind_label">Tryb daltonistów</string>
-    <string name="settings_colorblind_none">Wyłączony</string>
-    <string name="settings_colorblind_protanopia">Protanopia (brak czerwonego)</string>
-    <string name="settings_colorblind_deuteranopia">Deuteranopia (brak zielonego)</string>
-    <string name="settings_colorblind_tritanopia">Tritanopia (brak niebieskiego)</string>
 
     <!-- Navigation -->
     <string name="nav_dashboard">Kursy</string>

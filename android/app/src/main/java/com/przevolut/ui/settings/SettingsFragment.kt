@@ -34,11 +34,17 @@ class SettingsFragment : Fragment() {
         RefreshOption(60, R.string.settings_refresh_60),
         RefreshOption(240, R.string.settings_refresh_240),
     )
+    private val fontScaleOptions = listOf(
+        FontScaleOption(1.0f, R.string.settings_font_normal),
+        FontScaleOption(1.25f, R.string.settings_font_large),
+        FontScaleOption(1.5f, R.string.settings_font_xlarge),
+    )
 
     private var suppressCurrencyCallback = false
     private var suppressThemeCallback = false
     private var suppressRefreshCallback = false
     private var suppressBiometricCallback = false
+    private var suppressFontScaleCallback = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -51,6 +57,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupCurrencyDropdown()
         setupRefreshDropdown()
+        setupFontScaleDropdown()
         observeViewModel()
         observeEvents()
 
@@ -106,6 +113,22 @@ class SettingsFragment : Fragment() {
         binding.actvRefreshInterval.setOnItemClickListener { _, _, position, _ ->
             if (!suppressRefreshCallback) {
                 viewModel.setRefreshIntervalMinutes(refreshOptions[position].minutes)
+            }
+        }
+    }
+
+    private fun setupFontScaleDropdown() {
+        val labels = fontScaleOptions.map { getString(it.labelRes) }
+        val adapter = NonFilterableArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            labels
+        )
+        binding.actvFontScale.setAdapter(adapter)
+        binding.actvFontScale.setOnItemClickListener { _, _, position, _ ->
+            if (!suppressFontScaleCallback) {
+                viewModel.setFontScale(fontScaleOptions[position].scale)
+                requireActivity().recreate()
             }
         }
     }
@@ -184,6 +207,16 @@ class SettingsFragment : Fragment() {
                     ?: getString(R.string.settings_refresh_60)
                 binding.actvRefreshInterval.setText(refreshLabel, false)
                 suppressRefreshCallback = false
+
+                // ── Accessibility ───────────────────────────────────
+                suppressFontScaleCallback = true
+                val fontLabel = fontScaleOptions
+                    .firstOrNull { it.scale == settings.fontScale }
+                    ?.labelRes
+                    ?.let { getString(it) }
+                    ?: getString(R.string.settings_font_normal)
+                binding.actvFontScale.setText(fontLabel, false)
+                suppressFontScaleCallback = false
             }
         }
     }
@@ -203,6 +236,7 @@ class SettingsFragment : Fragment() {
     }
 
     private data class RefreshOption(val minutes: Int, val labelRes: Int)
+    private data class FontScaleOption(val scale: Float, val labelRes: Int)
 
     /**
      * ArrayAdapter subclass that disables filtering entirely.

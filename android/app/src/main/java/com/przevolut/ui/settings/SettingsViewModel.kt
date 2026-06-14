@@ -22,6 +22,7 @@ data class AppSettings(
     val biometricEnabled: Boolean = false,
     val themeMode: String = "system",
     val refreshIntervalMinutes: Int = 60,
+    val fontScale: Float = 1.0f,
 )
 
 sealed class SettingsEvent {
@@ -82,6 +83,7 @@ class SettingsViewModel @Inject constructor(
             biometricEnabled = loggedIn && prefs.getBoolean("biometric_enabled", false),
             themeMode = prefs.getString("theme_mode", "system") ?: "system",
             refreshIntervalMinutes = prefs.getInt("refresh_interval_minutes", 60),
+            fontScale = prefs.getFloat("a11y_font_scale", 1.0f),
         )
     }
 
@@ -108,6 +110,11 @@ class SettingsViewModel @Inject constructor(
     fun setRefreshIntervalMinutes(minutes: Int) {
         prefs.edit().putInt("refresh_interval_minutes", minutes).apply()
         _settings.value = _settings.value.copy(refreshIntervalMinutes = minutes)
+    }
+
+    fun setFontScale(scale: Float) {
+        prefs.edit().putFloat("a11y_font_scale", scale).apply()
+        _settings.value = _settings.value.copy(fontScale = scale)
     }
 
     fun changePassword(currentPassword: String, newPassword: String) {

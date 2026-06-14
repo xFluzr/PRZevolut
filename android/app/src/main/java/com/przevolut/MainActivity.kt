@@ -1,5 +1,6 @@
 package com.przevolut
 
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -10,6 +11,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.przevolut.databinding.ActivityMainBinding
+import com.przevolut.ui.common.AccessibilityHelper
 import com.przevolut.ui.common.ThemeHelper
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,6 +20,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+
+    override fun attachBaseContext(newBase: Context) {
+        // Nadpisanie fontScale PRZED inflacją layoutów —
+        // działa na cały tekst w Activity bez modyfikowania XML-i
+        super.attachBaseContext(AccessibilityHelper.applyFontScale(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(ThemeHelper.getThemeMode(this))
