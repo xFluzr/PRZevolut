@@ -39,5 +39,5 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 EXPOSE 8000
 
-# Uruchomienie serwera Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Uruchomienie migracji bazy danych, a po ich zakończeniu start serwera Uvicorn
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"]
