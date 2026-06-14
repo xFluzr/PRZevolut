@@ -54,6 +54,7 @@
     <color name="overlay_text">#FFFFFF</color>
     <color name="overlay_accent">#FFD700</color>
     <color name="scanner_reticle">#00E676</color>
+    <color name="viewfinder_scrim">#80000000</color>
 
     <color name="offline_banner">#E65100</color>
     <color name="on_offline_banner">#FFFFFF</color>

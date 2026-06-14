@@ -121,29 +121,7 @@ class AlertsFragment : Fragment() {
         val selectedCurrencies = mutableListOf<String>()
         var selectedDirection = existing?.direction ?: "above"
 
-        if (isEdit) {
-            currencyChips.forEach { (chip, code) ->
-                chip.isEnabled = false
-                if (code == existing!!.currency) {
-                    chip.isChecked = true
-                    selectedCurrencies.add(code)
-                }
-            }
-            dialogBinding.etThreshold.setText("%.4f".format(existing!!.threshold))
-            if (existing.direction == "below") {
-                dialogBinding.btnBelow.isChecked = true
-            } else {
-                dialogBinding.btnAbove.isChecked = true
-            }
-        } else {
-            val initialCurrency = if (defaultCurrency in watched) defaultCurrency else watched.firstOrNull()
-            if (initialCurrency != null) {
-                currencyChips.find { it.second == initialCurrency }?.first?.isChecked = true
-                selectedCurrencies.add(initialCurrency)
-            }
-            dialogBinding.btnAbove.isChecked = true
-        }
-
+        // Set up listeners BEFORE programmatic state changes so they fire correctly
         dialogBinding.chipGroupCurrency.setOnCheckedStateChangeListener { _, checkedIds ->
             selectedCurrencies.clear()
             checkedIds.forEach { checkedId ->
@@ -162,6 +140,30 @@ class AlertsFragment : Fragment() {
             }
         }
 
+        if (isEdit) {
+            currencyChips.forEach { (chip, code) ->
+                chip.isEnabled = false
+                if (code == existing!!.currency) {
+                    chip.isChecked = true
+                    selectedCurrencies.add(code)
+                }
+            }
+            dialogBinding.etThreshold.setText("%.4f".format(existing!!.threshold))
+            // Use ToggleGroup.check() instead of button.isChecked for proper group notification
+            if (existing.direction == "below") {
+                dialogBinding.toggleDirection.check(R.id.btn_below)
+            } else {
+                dialogBinding.toggleDirection.check(R.id.btn_above)
+            }
+        } else {
+            val initialCurrency = if (defaultCurrency in watched) defaultCurrency else watched.firstOrNull()
+            if (initialCurrency != null) {
+                currencyChips.find { it.second == initialCurrency }?.first?.isChecked = true
+                selectedCurrencies.add(initialCurrency)
+            }
+            dialogBinding.toggleDirection.check(R.id.btn_above)
+        }
+
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (isEdit) R.string.dialog_edit_alert_title else R.string.dialog_add_alert_title)
             .setView(dialogBinding.root)
@@ -174,8 +176,8 @@ class AlertsFragment : Fragment() {
 
         dialog.setOnShowListener {
             val confirmButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
-            confirmButton.isEnabled = existing != null
 
+            // Attach TextWatcher first, then validate initial state
             dialogBinding.etThreshold.addTextChangedListener(
                 object : android.text.TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -186,6 +188,11 @@ class AlertsFragment : Fragment() {
                     }
                 }
             )
+
+            // Validate initial state — in edit mode the field is pre-filled,
+            // but the TextWatcher above only fires on *changes*
+            val initialValue = dialogBinding.etThreshold.text?.toString()?.toDoubleOrNull()
+            confirmButton.isEnabled = initialValue != null && initialValue > 0
 
             confirmButton.setOnClickListener {
                 val threshold = dialogBinding.etThreshold.text?.toString()?.toDoubleOrNull()

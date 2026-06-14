@@ -78,6 +78,8 @@
     <string name="cd_currency_chips">Wybierz walutę do skanowania</string>
     <string name="cd_manual_input_fab">Wpisz cenę ręcznie</string>
     <string name="cd_scanner_result">Wynik przeliczenia</string>
+    <string name="scanner_viewfinder_hint">Skieruj kamerę na cenę</string>
+    <string name="cd_scanner_viewfinder">Celownik skanera — umieść cenę w ramce</string>
 
     <!-- Settings -->
     <string name="default_currency_label">Domyślna waluta</string>
@@ -109,6 +111,21 @@
     <string name="settings_version">PRZevolut v%1$s</string>
     <string name="cd_biometric_switch">Włącz lub wyłącz logowanie biometryczne</string>
     <string name="cd_logout_button">Wyloguj się z aplikacji</string>
+
+    <!-- Accessibility -->
+    <string name="settings_section_accessibility">Dostępność</string>
+    <string name="settings_font_scale_label">Rozmiar tekstu</string>
+    <string name="settings_font_normal">Normalny</string>
+    <string name="settings_font_large">Duży</string>
+    <string name="settings_font_xlarge">Bardzo duży</string>
+    <string name="settings_high_contrast_label">Wysoki kontrast</string>
+    <string name="settings_high_contrast_hint">Zwiększa kontrast kolorów dla lepszej czytelności</string>
+    <string name="cd_high_contrast_switch">Włącz lub wyłącz tryb wysokiego kontrastu</string>
+    <string name="settings_colorblind_label">Tryb daltonistów</string>
+    <string name="settings_colorblind_none">Wyłączony</string>
+    <string name="settings_colorblind_protanopia">Protanopia (brak czerwonego)</string>
+    <string name="settings_colorblind_deuteranopia">Deuteranopia (brak zielonego)</string>
+    <string name="settings_colorblind_tritanopia">Tritanopia (brak niebieskiego)</string>
 
     <!-- Navigation -->
     <string name="nav_dashboard">Kursy</string>

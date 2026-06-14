@@ -82,7 +82,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupCurrencyDropdown() {
-        val adapter = ArrayAdapter(
+        val adapter = NonFilterableArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
             supportedCurrencies
@@ -97,7 +97,7 @@ class SettingsFragment : Fragment() {
 
     private fun setupRefreshDropdown() {
         val labels = refreshOptions.map { getString(it.labelRes) }
-        val adapter = ArrayAdapter(
+        val adapter = NonFilterableArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
             labels
@@ -203,6 +203,41 @@ class SettingsFragment : Fragment() {
     }
 
     private data class RefreshOption(val minutes: Int, val labelRes: Int)
+
+    /**
+     * ArrayAdapter subclass that disables filtering entirely.
+     *
+     * The default ArrayAdapter applies an internal Filter when
+     * AutoCompleteTextView.setText() is called, even with the
+     * "filter = false" parameter. After Activity recreation (e.g.
+     * theme change), the adapter is created fresh, setText restores
+     * the saved value, and the internal filter remembers only the
+     * matching item — so the dropdown shows just one option.
+     *
+     * By overriding getFilter() to return a no-op filter, we ensure
+     * the dropdown always shows the full list of options.
+     */
+    private class NonFilterableArrayAdapter<T>(
+        context: android.content.Context,
+        resource: Int,
+        private val allItems: List<T>
+    ) : ArrayAdapter<T>(context, resource, allItems) {
+
+        override fun getFilter(): android.widget.Filter {
+            return object : android.widget.Filter() {
+                override fun performFiltering(constraint: CharSequence?): FilterResults {
+                    return FilterResults().apply {
+                        values = allItems
+                        count = allItems.size
+                    }
+                }
+
+                override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                    notifyDataSetChanged()
+                }
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
