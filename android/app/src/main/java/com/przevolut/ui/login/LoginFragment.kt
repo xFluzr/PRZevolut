@@ -1,5 +1,6 @@
 package com.przevolut.ui.login
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,19 +9,25 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.przevolut.R
+import com.przevolut.data.local.TokenManager
 import com.przevolut.databinding.FragmentLoginBinding
 import com.przevolut.ui.common.ThemeHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
+
+    @Inject lateinit var tokenManager: TokenManager
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
@@ -38,10 +45,57 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupKeyboardInsets()
         setupThemeToggle()
         setupAuthModeToggle()
         setupClickListeners()
         observeViewModel()
+        setupBiometricIfAvailable()
+    }
+
+    /**
+     * When WindowCompat.setDecorFitsSystemWindows(false) is set in MainActivity,
+     * adjustResize stops working automatically. We:
+     *  1. Update ScrollView paddingBottom = keyboard height so the content area shrinks.
+     *  2. After the layout redraws, scroll the focused field into view so the user
+     *     can always see what they are typing.
+     */
+    private fun setupKeyboardInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { scrollView, insets ->
+            val imeInsets   = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val bottomPad   = maxOf(imeInsets.bottom, navBarInsets.bottom)
+
+            scrollView.setPadding(
+                scrollView.paddingLeft,
+                scrollView.paddingTop,
+                scrollView.paddingRight,
+                bottomPad
+            )
+
+            // If the keyboard is open, scroll so the focused field is visible.
+            if (imeInsets.bottom > 0) {
+                val focused = scrollView.findFocus()
+                if (focused != null) {
+                    // Post so the layout has finished applying the new padding first.
+                    scrollView.post {
+                        val scrollViewCast = scrollView as? android.widget.ScrollView ?: return@post
+                        // Compute the focused view's position relative to the ScrollView.
+                        val focusedRect = android.graphics.Rect()
+                        focused.getDrawingRect(focusedRect)
+                        scrollViewCast.offsetDescendantRectToMyCoords(focused, focusedRect)
+                        // Add a small extra gap (16dp) so the field isn't flush against the keyboard.
+                        val extraGap = (16 * resources.displayMetrics.density).toInt()
+                        scrollViewCast.smoothScrollTo(0, focusedRect.bottom - scrollViewCast.height + bottomPad + extraGap)
+                    }
+                }
+            }
+            insets
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
         setupBiometricIfAvailable()
     }
 
@@ -139,20 +193,34 @@ class LoginFragment : Fragment() {
     }
 
     private fun setupBiometricIfAvailable() {
+        val prefs = requireContext().getSharedPreferences("przevolut_prefs", Context.MODE_PRIVATE)
+        val biometricEnabled = prefs.getBoolean("biometric_enabled", false)
+        val hasSavedSession = tokenManager.isLoggedIn()
+
         val biometricManager = BiometricManager.from(requireContext())
         val canAuthenticate = biometricManager.canAuthenticate(BIOMETRIC_STRONG)
-        binding.btnBiometric.visibility = if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+
+        val showBiometric = hasSavedSession &&
+            biometricEnabled &&
+            canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS
+
+        binding.btnBiometric.visibility = if (showBiometric) View.VISIBLE else View.GONE
     }
 
     private fun showBiometricPrompt() {
+        if (!tokenManager.isLoggedIn()) {
+            Snackbar.make(
+                binding.cardLogin,
+                "Najpierw zaloguj się hasłem.",
+                Snackbar.LENGTH_LONG
+            ).show()
+            return
+        }
+
         val executor = ContextCompat.getMainExecutor(requireContext())
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Zaloguj się biometrycznie")
-            .setSubtitle("Użyj odcisku palca lub twarzy")
+            .setSubtitle(getString(R.string.biometric_login_hint))
             .setNegativeButtonText("Użyj hasła")
             .setAllowedAuthenticators(BIOMETRIC_STRONG)
             .build()

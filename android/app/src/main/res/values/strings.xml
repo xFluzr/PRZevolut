@@ -33,7 +33,7 @@
     <string name="dashboard_chart_subtitle">Ostatnie 14 dni roboczych — 1 jednostka waluty w PLN</string>
     <string name="dashboard_chart_hint">Dotknij waluty, aby dodać lub usunąć z wykresu i listy. Przeciągnij wykres palcem.</string>
     <string name="dashboard_chart_axis_hint">Oś X: dzień · Oś Y: kurs PLN</string>
-    <string name="dashboard_chart_empty">Za mało danych historycznych. Odśwież kursy i sprawdź ponownie jutro.</string>
+    <string name="dashboard_chart_empty">Brak historii wykresu. Na telefonie ustaw BASE_URL na IP komputera w Wi‑Fi (nie 10.0.2.2), potem odśwież.</string>
     <string name="dashboard_watchlist_label">Wybierz waluty do śledzenia</string>
     <string name="dashboard_rates_list_title">Twoje kursy</string>
     <string name="cd_currency_filter">Filtr walut na wykresie i liście</string>
@@ -82,6 +82,17 @@
     <string name="default_currency_label">Domyślna waluta</string>
     <string name="biometric_label">Logowanie biometryczne</string>
     <string name="btn_logout">Wyloguj się</string>
+    <string name="settings_section_account">Konto</string>
+    <string name="settings_account_email">E-mail</string>
+    <string name="settings_account_not_logged_in">Nie zalogowano</string>
+    <string name="settings_change_password">Zmień hasło</string>
+    <string name="settings_biometric_hint">Dostępne po pierwszym logowaniu hasłem</string>
+    <string name="dialog_change_password_title">Zmiana hasła</string>
+    <string name="dialog_current_password">Aktualne hasło</string>
+    <string name="dialog_new_password">Nowe hasło</string>
+    <string name="password_changed_success">Hasło zostało zmienione</string>
+    <string name="password_change_failed">Nie udało się zmienić hasła</string>
+    <string name="biometric_login_hint">Szybkie logowanie po wcześniejszej sesji</string>
     <string name="settings_section_general">Ogólne</string>
     <string name="settings_section_appearance">Wygląd</string>
     <string name="settings_section_sync">Synchronizacja</string>

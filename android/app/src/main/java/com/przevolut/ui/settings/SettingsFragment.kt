@@ -5,9 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.przevolut.BuildConfig
 import com.przevolut.R
 import com.przevolut.databinding.FragmentSettingsBinding
@@ -33,6 +38,7 @@ class SettingsFragment : Fragment() {
     private var suppressCurrencyCallback = false
     private var suppressThemeCallback = false
     private var suppressRefreshCallback = false
+    private var suppressBiometricCallback = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -46,9 +52,12 @@ class SettingsFragment : Fragment() {
         setupCurrencyDropdown()
         setupRefreshDropdown()
         observeViewModel()
+        observeEvents()
 
         binding.switchBiometric.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setBiometricEnabled(isChecked)
+            if (!suppressBiometricCallback) {
+                viewModel.setBiometricEnabled(isChecked)
+            }
         }
 
         binding.toggleTheme.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -62,8 +71,14 @@ class SettingsFragment : Fragment() {
             ThemeHelper.applyTheme(mode)
         }
 
+        binding.btnChangePassword.setOnClickListener { showChangePasswordDialog() }
         binding.btnLogout.setOnClickListener { viewModel.logout() }
         binding.tvAppVersion.text = getString(R.string.settings_version, BuildConfig.VERSION_NAME)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshProfile()
     }
 
     private fun setupCurrencyDropdown() {
@@ -95,14 +110,63 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun showChangePasswordDialog() {
+        val currentInput = TextInputEditText(requireContext()).apply {
+            hint = getString(R.string.dialog_current_password)
+        }
+        val newInput = TextInputEditText(requireContext()).apply {
+            hint = getString(R.string.dialog_new_password)
+        }
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val pad = resources.getDimensionPixelSize(R.dimen.spacing_md)
+            setPadding(pad, pad, pad, 0)
+            addView(TextInputLayout(requireContext()).apply { addView(currentInput) })
+            addView(TextInputLayout(requireContext()).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = pad }
+                addView(newInput)
+            })
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_change_password_title)
+            .setView(container)
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .setPositiveButton(R.string.dialog_confirm_save) { _, _ ->
+                val current = currentInput.text?.toString().orEmpty()
+                val newPass = newInput.text?.toString().orEmpty()
+                if (newPass.length >= 8) {
+                    viewModel.changePassword(current, newPass)
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Nowe hasło musi mieć co najmniej 8 znaków.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            .show()
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.settings.collect { settings ->
+                binding.tvUserEmail.text = settings.userEmail
+                    ?: getString(R.string.settings_account_not_logged_in)
+
+                binding.btnChangePassword.isEnabled = settings.isLoggedIn
+
+                suppressBiometricCallback = true
+                binding.switchBiometric.isChecked = settings.biometricEnabled
+                binding.switchBiometric.isEnabled = settings.isLoggedIn
+                suppressBiometricCallback = false
+
                 suppressCurrencyCallback = true
                 binding.actvDefaultCurrency.setText(settings.defaultCurrency, false)
                 suppressCurrencyCallback = false
-
-                binding.switchBiometric.isChecked = settings.biometricEnabled
 
                 suppressThemeCallback = true
                 when (settings.themeMode) {
@@ -120,6 +184,20 @@ class SettingsFragment : Fragment() {
                     ?: getString(R.string.settings_refresh_60)
                 binding.actvRefreshInterval.setText(refreshLabel, false)
                 suppressRefreshCallback = false
+            }
+        }
+    }
+
+    private fun observeEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is SettingsEvent.Message ->
+                        Toast.makeText(requireContext(), event.text, Toast.LENGTH_LONG).show()
+                    SettingsEvent.LoggedOut -> {
+                        findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
+                    }
+                }
             }
         }
     }

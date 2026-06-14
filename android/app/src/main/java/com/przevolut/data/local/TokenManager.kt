@@ -14,13 +14,21 @@ class TokenManager @Inject constructor(
 
     fun saveToken(token: String) = prefs.edit { putString(KEY_TOKEN, token) }
 
+    fun saveUserEmail(email: String) = prefs.edit { putString(KEY_EMAIL, email) }
+
     fun getToken(): String? = prefs.getString(KEY_TOKEN, null)
 
-    fun clearToken() = prefs.edit { remove(KEY_TOKEN) }
+    fun getUserEmail(): String? = prefs.getString(KEY_EMAIL, null)
+
+    fun clearToken() = prefs.edit {
+        remove(KEY_TOKEN)
+        remove(KEY_EMAIL)
+    }
 
     fun isLoggedIn(): Boolean = getToken() != null
 
     companion object {
         private const val KEY_TOKEN = "access_token"
+        private const val KEY_EMAIL = "user_email"
     }
 }

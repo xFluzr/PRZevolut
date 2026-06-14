@@ -36,6 +36,7 @@ class LoginViewModel @Inject constructor(
                 if (response.isSuccessful) {
                     val token = response.body()?.accessToken ?: ""
                     tokenManager.saveToken(token)
+                    tokenManager.saveUserEmail(email)
                     _uiState.value = LoginUiState.Success(token)
                 } else {
                     _uiState.value = LoginUiState.Error("Nieprawidłowy e-mail lub hasło.")

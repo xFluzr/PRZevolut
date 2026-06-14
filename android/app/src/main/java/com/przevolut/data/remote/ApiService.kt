@@ -8,6 +8,8 @@ import com.przevolut.data.remote.model.LoginResponse
 import com.przevolut.data.remote.model.RateHistoryResponse
 import com.przevolut.data.remote.model.RateResponse
 import com.przevolut.data.remote.model.RatesResponse
+import com.przevolut.data.remote.model.PasswordChangeRequest
+import com.przevolut.data.remote.model.UserResponse
 import com.przevolut.data.remote.model.RegisterRequest
 import com.przevolut.data.remote.model.RegisterResponse
 import retrofit2.Response
@@ -20,6 +22,12 @@ interface ApiService {
 
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
+    @GET("auth/me")
+    suspend fun getMe(): Response<UserResponse>
+
+    @PATCH("auth/password")
+    suspend fun changePassword(@Body request: PasswordChangeRequest): Response<Unit>
 
     @GET("rates")
     suspend fun getRates(): Response<RatesResponse>

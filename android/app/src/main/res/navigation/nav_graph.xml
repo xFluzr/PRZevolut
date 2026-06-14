@@ -48,6 +48,12 @@
         android:id="@+id/settingsFragment"
         android:name="com.przevolut.ui.settings.SettingsFragment"
         android:label="Ustawienia"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>

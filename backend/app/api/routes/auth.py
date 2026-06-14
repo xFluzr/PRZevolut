@@ -19,9 +19,11 @@ from app.models import RefreshToken, User
 from app.schemas import (
     AccessTokenResponse,
     LoginRequest,
+    PasswordChangeRequest,
     RefreshRequest,
     RegisterRequest,
     TokenResponse,
+    UserOut,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -148,3 +150,31 @@ async def logout(
     if stored_token:
         stored_token.revoked = True
         await db.commit()
+
+
+@router.get(
+    "/me",
+    response_model=UserOut,
+    summary="Profil zalogowanego użytkownika",
+)
+async def get_me(current_user: User = Depends(get_current_user)) -> UserOut:
+    """Zwraca dane konta bieżącego użytkownika."""
+    return current_user
+
+
+@router.patch(
+    "/password",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Zmiana hasła",
+)
+async def change_password(
+    payload: PasswordChangeRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    """Zmienia hasło po podaniu aktualnego hasła."""
+    if not verify_password(payload.current_password, current_user.password_hash):
+        raise CredentialsException("Aktualne hasło jest nieprawidłowe.")
+
+    current_user.password_hash = hash_password(payload.new_password)
+    await db.commit()

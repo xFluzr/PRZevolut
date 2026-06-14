@@ -42,6 +42,11 @@ class UserOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
 # ─── Rates ───────────────────────────────────────────────────────────────────
 
 class RateItem(BaseModel):

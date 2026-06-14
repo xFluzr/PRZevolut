@@ -20,7 +20,10 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.ChartTouchListener
+import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import android.view.MotionEvent
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.przevolut.R
@@ -106,6 +109,46 @@ class DashboardFragment : Fragment() {
 
             override fun onNothingSelected() = Unit
         })
+
+        // Fix: prevent NestedScrollView from stealing touch events while the user
+        // is interacting with the chart (drag / highlight), then re-enable scroll
+        // once the gesture finishes so the page can still scroll normally.
+        // For pinch-zoom gestures we keep intercept blocked for the full duration.
+        var isPinchZooming = false
+        binding.lineChart.onChartGestureListener = object : OnChartGestureListener {
+            override fun onChartGestureStart(
+                me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?
+            ) {
+                isPinchZooming = false
+                binding.scrollDashboard.requestDisallowInterceptTouchEvent(true)
+            }
+
+            override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {
+                isPinchZooming = true
+                binding.scrollDashboard.requestDisallowInterceptTouchEvent(true)
+            }
+
+            override fun onChartGestureEnd(
+                me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?
+            ) {
+                // Only re-allow scroll intercept when zoom gesture has fully ended
+                if (!isPinchZooming) {
+                    binding.scrollDashboard.requestDisallowInterceptTouchEvent(false)
+                } else {
+                    // Give a short delay so multi-touch UP events settle before unlocking scroll
+                    binding.scrollDashboard.postDelayed({
+                        isPinchZooming = false
+                        binding.scrollDashboard.requestDisallowInterceptTouchEvent(false)
+                    }, 150)
+                }
+            }
+
+            override fun onChartLongPressed(me: MotionEvent?) {}
+            override fun onChartDoubleTapped(me: MotionEvent?) {}
+            override fun onChartSingleTapped(me: MotionEvent?) {}
+            override fun onChartFling(me1: MotionEvent?, me2: MotionEvent?, velocityX: Float, velocityY: Float) {}
+            override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {}
+        }
     }
 
     private fun observeViewModel() {
@@ -202,10 +245,11 @@ class DashboardFragment : Fragment() {
             isDragEnabled = true
             setScaleEnabled(true)
             setPinchZoom(true)
+            setHighlightPerDragEnabled(false)
             setDrawGridBackground(false)
             setNoDataText(getString(R.string.dashboard_chart_empty))
-            setExtraOffsets(48f, 12f, 16f, 32f)
-            setMinOffset(12f)
+            setExtraOffsets(16f, 12f, 16f, 16f)
+            setMinOffset(0f)
 
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM

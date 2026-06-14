@@ -6,87 +6,92 @@
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground">
 
-    <LinearLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/spacing_xxl"
-            android:indeterminate="true"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/layout_empty"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="@dimen/spacing_xl"
-            android:paddingBottom="@dimen/fab_margin_above_bottom_nav"
-            android:visibility="gone">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/iv_empty"
-                android:layout_width="@dimen/empty_illustration_size"
-                android:layout_height="@dimen/empty_illustration_size"
-                android:contentDescription="@string/cd_empty_alerts"
-                android:src="@drawable/ic_empty_alerts" />
-
-            <TextView
-                android:id="@+id/tv_empty_title"
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:text="@string/no_alerts"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="?attr/colorOnSurface" />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/spacing_xxl"
+                android:indeterminate="true"
+                android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/tv_empty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:gravity="center"
-                android:text="@string/no_alerts_body"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/layout_empty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:visibility="gone">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_alert"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:minHeight="@dimen/touch_target_min"
-                android:text="@string/fab_add_alert"
-                app:icon="@drawable/ic_add" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/spacing_xl"
+                    android:paddingEnd="@dimen/spacing_xl"
+                    android:paddingTop="@dimen/spacing_xl"
+                    android:paddingBottom="@dimen/spacing_xl"
+                    android:minHeight="200dp">
 
-        </LinearLayout>
+                    <ImageView
+                        android:id="@+id/iv_empty"
+                        android:layout_width="@dimen/empty_illustration_size"
+                        android:layout_height="@dimen/empty_illustration_size"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/cd_empty_alerts"
+                        android:src="@drawable/ic_empty_alerts" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_alerts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="@dimen/spacing_md"
-            android:paddingBottom="@dimen/fab_margin_above_bottom_nav" />
+                    <TextView
+                        android:id="@+id/tv_empty_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_lg"
+                        android:gravity="center"
+                        android:text="@string/no_alerts"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="?attr/colorOnSurface" />
 
-    </LinearLayout>
+                    <TextView
+                        android:id="@+id/tv_empty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:gravity="center"
+                        android:text="@string/no_alerts_body"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_alert"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/spacing_lg"
-        android:layout_marginBottom="@dimen/fab_margin_above_bottom_nav"
-        android:contentDescription="@string/fab_add_alert"
-        android:minHeight="@dimen/touch_target_min"
-        android:minWidth="@dimen/touch_target_min"
-        android:src="@drawable/ic_add" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_add_alert"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_lg"
+                        android:minHeight="@dimen/touch_target_min"
+                        android:text="@string/fab_add_alert"
+                        app:icon="@drawable/ic_add" />
+
+                </LinearLayout>
+
+            </androidx.core.widget.NestedScrollView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_alerts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="@dimen/spacing_md"
+                android:paddingBottom="@dimen/fab_margin_above_bottom_nav" />
+
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

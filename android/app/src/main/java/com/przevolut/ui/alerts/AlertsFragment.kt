@@ -2,9 +2,13 @@ package com.przevolut.ui.alerts
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.content.Context
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -37,8 +41,35 @@ class AlertsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeViewModel()
-        binding.fabAddAlert.setOnClickListener { showAlertDialog() }
+        setupInsets()
         binding.btnAddAlert.setOnClickListener { showAlertDialog() }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.loadAlerts() }
+    }
+
+    /**
+     * Dynamically adjust RecyclerView and empty-state bottom padding to account
+     * for the system navigation bar height (gesture nav varies per device).
+     */
+    private fun setupInsets() {
+        val baseMargin  = resources.getDimensionPixelSize(R.dimen.spacing_lg)  // 24dp
+        val navBarHeight = resources.getDimensionPixelSize(R.dimen.bottom_nav_height) // 64dp
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rvAlerts) { rv, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            rv.setPadding(
+                rv.paddingLeft, rv.paddingTop, rv.paddingRight,
+                navBarHeight + systemBars.bottom + baseMargin
+            )
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.layoutEmpty) { layout, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            layout.setPadding(
+                layout.paddingLeft, layout.paddingTop, layout.paddingRight,
+                navBarHeight + systemBars.bottom + baseMargin
+            )
+            insets
+        }
     }
 
     override fun onResume() {
@@ -141,12 +172,17 @@ class AlertsFragment : Fragment() {
                 }
             }
 
+            // Explicitly show the soft keyboard so it appears reliably on all
+            // Android versions (SOFT_INPUT_ADJUST_RESIZE is deprecated since API 30).
             dialogBinding.etThreshold.requestFocus()
+            dialogBinding.etThreshold.postDelayed({
+                val imm = requireContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(dialogBinding.etThreshold, InputMethodManager.SHOW_IMPLICIT)
+            }, 100)
         }
 
-        dialog.setOnDismissListener {
-            binding.fabAddAlert.requestFocus()
-        }
+        dialog.setOnDismissListener { }
 
         dialog.show()
     }
@@ -159,6 +195,7 @@ class AlertsFragment : Fragment() {
                         binding.progressBar.visibility = View.VISIBLE
                     }
                     is AlertsUiState.Success -> {
+                        binding.swipeRefresh.isRefreshing = false
                         binding.progressBar.visibility = View.GONE
                         alertsAdapter.submitList(state.alerts)
                         val isEmpty = state.alerts.isEmpty()
@@ -170,6 +207,7 @@ class AlertsFragment : Fragment() {
                         }
                     }
                     is AlertsUiState.Error -> {
+                        binding.swipeRefresh.isRefreshing = false
                         binding.progressBar.visibility = View.GONE
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                     }

@@ -27,6 +27,18 @@ data class LoginResponse(
     @SerializedName("token_type") val tokenType: String
 )
 
+data class UserResponse(
+    val id: Int,
+    val email: String,
+    @SerializedName("is_active") val isActive: Boolean,
+    @SerializedName("created_at") val createdAt: String
+)
+
+data class PasswordChangeRequest(
+    @SerializedName("current_password") val currentPassword: String,
+    @SerializedName("new_password") val newPassword: String
+)
+
 // ── Rates ─────────────────────────────────────────────────────────────────
 
 data class RatesResponse(
