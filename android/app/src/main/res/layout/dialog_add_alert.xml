@@ -15,57 +15,22 @@
         android:textAppearance="?attr/textAppearanceLabelLarge"
         android:textColor="?attr/colorOnSurface" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group_currency"
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:scrollbars="none"
         android:layout_marginTop="@dimen/spacing_sm"
-        android:layout_marginBottom="@dimen/spacing_md"
-        app:selectionRequired="true"
-        app:singleSelection="true">
+        android:layout_marginBottom="@dimen/spacing_md">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_eur"
-            style="@style/Widget.Material3.Chip.Filter"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_currency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="EUR" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_usd"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="USD" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_gbp"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="GBP" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_chf"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="CHF" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_czk"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="CZK" />
-
-    </com.google.android.material.chip.ChipGroup>
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
 
     <TextView
         android:id="@+id/label_direction"

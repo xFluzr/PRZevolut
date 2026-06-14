@@ -13,7 +13,8 @@ import com.przevolut.ui.common.CurrencyUi
 
 class AlertsAdapter(
     private val onEditClick: (AlertResponse) -> Unit,
-    private val onDeleteClick: (AlertResponse) -> Unit
+    private val onDeleteClick: (AlertResponse) -> Unit,
+    private val onToggleActiveClick: (AlertResponse) -> Unit
 ) : ListAdapter<AlertResponse, AlertsAdapter.AlertViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlertViewHolder {
@@ -74,6 +75,7 @@ class AlertsAdapter(
             )
             binding.btnDeleteAlert.setOnClickListener { onDeleteClick(alert) }
             binding.cardAlert.setOnClickListener { onEditClick(alert) }
+            binding.chipStatus.setOnClickListener { onToggleActiveClick(alert) }
 
             val directionLabel = if (alert.direction == "below") "poniżej" else "powyżej"
             binding.root.contentDescription =

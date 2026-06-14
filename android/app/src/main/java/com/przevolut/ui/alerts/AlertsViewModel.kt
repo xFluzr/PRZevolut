@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.przevolut.data.local.DashboardWatchlistStore
 
 sealed class AlertsUiState {
     object Loading : AlertsUiState()
@@ -22,7 +23,8 @@ sealed class AlertsUiState {
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
     private val apiService: ApiService,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val watchlistStore: DashboardWatchlistStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AlertsUiState>(AlertsUiState.Loading)
@@ -31,6 +33,9 @@ class AlertsViewModel @Inject constructor(
     init {
         loadAlerts()
     }
+    
+    fun getWatchedCurrencies(): Set<String> = watchlistStore.getWatchedCurrencies()
+    fun getDefaultCurrency(): String = watchlistStore.getDefaultCurrency()
 
     fun loadAlerts() {
         if (tokenManager.getToken() == null) {
@@ -105,6 +110,25 @@ class AlertsViewModel @Inject constructor(
                     loadAlerts()
                 } else {
                     _uiState.value = AlertsUiState.Error("Nie udało się zaktualizować alertu.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = AlertsUiState.Error("Brak połączenia z serwerem.")
+            }
+        }
+    }
+
+    fun toggleAlertStatus(alertId: Int, isActive: Boolean) {
+        if (tokenManager.getToken() == null) return
+        viewModelScope.launch {
+            try {
+                val response = apiService.updateAlert(
+                    alertId,
+                    AlertUpdateRequest(isActive = isActive)
+                )
+                if (response.isSuccessful) {
+                    loadAlerts()
+                } else {
+                    _uiState.value = AlertsUiState.Error("Nie udało się zmienić statusu alertu.")
                 }
             } catch (e: Exception) {
                 _uiState.value = AlertsUiState.Error("Brak połączenia z serwerem.")

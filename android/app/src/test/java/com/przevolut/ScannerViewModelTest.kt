@@ -34,6 +34,7 @@ class ScannerViewModelTest {
     fun setUp() {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
+        
         viewModel = ScannerViewModel(rateDao)
     }
 

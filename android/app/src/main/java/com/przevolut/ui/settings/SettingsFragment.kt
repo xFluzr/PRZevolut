@@ -27,7 +27,7 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: SettingsViewModel by viewModels()
 
-    private val supportedCurrencies = listOf("EUR", "USD", "GBP", "CHF", "CZK")
+    private val supportedCurrencies = com.przevolut.ui.common.CurrencyUi.SUPPORTED.toList()
     private val refreshOptions = listOf(
         RefreshOption(15, R.string.settings_refresh_15),
         RefreshOption(30, R.string.settings_refresh_30),

@@ -15,6 +15,16 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.przevolut.MainActivity
+import com.przevolut.R
 
 data class ChartPoint(val timestamp: Long, val ratePln: Float)
 
@@ -32,6 +42,7 @@ sealed class DashboardUiState {
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val rateDao: RateDao,
     private val apiService: ApiService,
     private val watchlistStore: DashboardWatchlistStore
@@ -90,6 +101,7 @@ class DashboardViewModel @Inject constructor(
                     rateDao.upsertRates(entities)
                     isOffline = false
                     loadChartData()
+                    checkAlertsLocally(entities)
                 } else {
                     showOfflineIfNoData()
                 }
@@ -242,5 +254,63 @@ class DashboardViewModel @Inject constructor(
     private fun formatTimestamp(millis: Long): String {
         val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         return sdf.format(Date(millis))
+    }
+
+    private fun checkAlertsLocally(rates: List<RateEntity>) {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getAlerts()
+                if (response.isSuccessful) {
+                    val alerts = response.body() ?: emptyList()
+                    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val channel = NotificationChannel("przevolut_main", "Powiadomienia PRZevolut", NotificationManager.IMPORTANCE_DEFAULT)
+                        manager.createNotificationChannel(channel)
+                    }
+
+                    for (alert in alerts) {
+                        if (!alert.isActive) continue // Alert wyłączony
+                        
+                        val rate = rates.find { it.currency == alert.currency } ?: continue
+                        var triggered = false
+                        var title = ""
+                        var body = ""
+
+                        if (alert.direction == "above" && rate.mid >= alert.targetRate) {
+                            triggered = true
+                            title = "Alert osiągnięty: ${alert.currency} rośnie!"
+                            body = "Kurs ${alert.currency} wynosi aktualnie %.4f PLN (ustawiony próg to %.4f)".format(rate.mid, alert.targetRate)
+                        } else if (alert.direction == "below" && rate.mid <= alert.targetRate) {
+                            triggered = true
+                            title = "Alert osiągnięty: ${alert.currency} spada!"
+                            body = "Kurs ${alert.currency} wynosi aktualnie %.4f PLN (ustawiony próg to %.4f)".format(rate.mid, alert.targetRate)
+                        }
+
+                        if (triggered) {
+                            val intent = Intent(context, MainActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            }
+                            val pendingIntent = PendingIntent.getActivity(
+                                context, alert.id, intent,
+                                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+                            )
+
+                            val notification = NotificationCompat.Builder(context, "przevolut_main")
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .setContentTitle(title)
+                                .setContentText(body)
+                                .setAutoCancel(true)
+                                .setContentIntent(pendingIntent)
+                                .build()
+
+                            manager.notify(alert.id, notification)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignoruj błędy przy sprawdzaniu
+            }
+        }
     }
 }

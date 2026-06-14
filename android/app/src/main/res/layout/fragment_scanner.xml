@@ -18,38 +18,7 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no" />
 
-    <LinearLayout
-        android:id="@+id/top_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_scanner_top_bar"
-        android:gravity="center_vertical"
-        android:minHeight="@dimen/scanner_top_bar_height"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/spacing_md"
-        android:paddingTop="@dimen/spacing_md"
-        android:paddingEnd="@dimen/spacing_md"
-        android:paddingBottom="@dimen/spacing_md"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tv_selected_currency"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textColor="@color/overlay_text" />
-
-        <TextView
-            android:id="@+id/tv_rate_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="@color/overlay_text" />
-
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_permission"
@@ -97,7 +66,7 @@
         android:orientation="vertical"
         android:padding="@dimen/spacing_lg"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/chip_group_currency"
+        app:layout_constraintBottom_toTopOf="@id/fab_manual_input"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -137,60 +106,7 @@
 
     </LinearLayout>
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group_currency"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/spacing_md"
-        android:contentDescription="@string/cd_currency_chips"
-        app:layout_constraintBottom_toTopOf="@id/fab_manual_input"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:selectionRequired="true"
-        app:singleSelection="true">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_eur"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="EUR" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_usd"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="USD" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_gbp"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="GBP" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_chf"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="CHF" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_czk"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/chip_min_height"
-            android:text="CZK" />
-
-    </com.google.android.material.chip.ChipGroup>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_manual_input"

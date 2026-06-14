@@ -80,7 +80,8 @@ class AlertsFragment : Fragment() {
     private fun setupRecyclerView() {
         alertsAdapter = AlertsAdapter(
             onEditClick = { alert -> showAlertDialog(alert) },
-            onDeleteClick = { alert -> viewModel.deleteAlert(alert.id) }
+            onDeleteClick = { alert -> viewModel.deleteAlert(alert.id) },
+            onToggleActiveClick = { alert -> viewModel.toggleAlertStatus(alert.id, !alert.isActive) }
         )
         binding.rvAlerts.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -90,18 +91,29 @@ class AlertsFragment : Fragment() {
 
     private fun showAlertDialog(existing: AlertResponse? = null) {
         val dialogBinding = DialogAddAlertBinding.inflate(layoutInflater)
-        val currencyChips = listOf(
-            dialogBinding.chipEur to "EUR",
-            dialogBinding.chipUsd to "USD",
-            dialogBinding.chipGbp to "GBP",
-            dialogBinding.chipChf to "CHF",
-            dialogBinding.chipCzk to "CZK",
-        )
-        currencyChips.forEach { (chip, code) ->
-            chip.text = CurrencyUi.chipLabel(code)
+        val watched = viewModel.getWatchedCurrencies()
+        val defaultCurrency = viewModel.getDefaultCurrency()
+        val sortedWatched = watched.toList().sortedWith(compareBy({ it != defaultCurrency }, { it }))
+        
+        val currencyChips = mutableListOf<Pair<com.google.android.material.chip.Chip, String>>()
+        dialogBinding.chipGroupCurrency.removeAllViews()
+        
+        sortedWatched.forEach { code ->
+            val chip = com.google.android.material.chip.Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Filter).apply {
+                text = CurrencyUi.chipLabel(code)
+                isCheckable = true
+                isCheckedIconVisible = false
+                id = View.generateViewId()
+            }
+            currencyChips.add(chip to code)
+            dialogBinding.chipGroupCurrency.addView(chip)
         }
 
-        var selectedCurrency = existing?.currency ?: "EUR"
+        var selectedCurrency = existing?.currency ?: defaultCurrency
+        // Upewnij się, że wybrana waluta jest faktycznie na liście chipów (np. jeśli usunęliśmy z obserwowanych)
+        if (selectedCurrency !in watched) {
+            selectedCurrency = defaultCurrency
+        }
         var selectedDirection = existing?.direction ?: "above"
 
         if (existing != null) {
@@ -116,7 +128,7 @@ class AlertsFragment : Fragment() {
                 dialogBinding.btnAbove.isChecked = true
             }
         } else {
-            dialogBinding.chipEur.isChecked = true
+            currencyChips.find { it.second == defaultCurrency }?.first?.isChecked = true
             dialogBinding.btnAbove.isChecked = true
         }
 

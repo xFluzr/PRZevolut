@@ -51,9 +51,6 @@ class ScannerFragment : Fragment() {
 
     private var lastOcrTimestamp = 0L
     private val ocrThrottleMs = 500L
-    private var selectedCurrency = "EUR"
-
-    private val currencyChips = mutableListOf<Pair<Chip, String>>()
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -76,7 +73,6 @@ class ScannerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        setupCurrencyChips()
         setupFabCollapse()
         checkCameraPermission()
         observeViewModel()
@@ -90,28 +86,6 @@ class ScannerFragment : Fragment() {
     override fun onStop() {
         stopCamera()
         super.onStop()
-    }
-
-    private fun setupCurrencyChips() {
-        currencyChips.clear()
-        currencyChips.addAll(
-            listOf(
-                binding.chipEur to "EUR",
-                binding.chipUsd to "USD",
-                binding.chipGbp to "GBP",
-                binding.chipChf to "CHF",
-                binding.chipCzk to "CZK",
-            )
-        )
-        currencyChips.forEach { (chip, code) ->
-            chip.text = CurrencyUi.chipLabel(code)
-        }
-
-        binding.chipGroupCurrency.setOnCheckedStateChangeListener { _, checkedIds ->
-            val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
-            selectedCurrency = currencyChips.first { it.first.id == checkedId }.second
-            updateTopBar(viewModel.ratesMap.value[selectedCurrency])
-        }
     }
 
     private fun setupFabCollapse() {
@@ -242,13 +216,6 @@ class ScannerFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.ratesMap.collect { rates ->
-                        if (isBindingActive()) {
-                            updateTopBar(rates[selectedCurrency])
-                        }
-                    }
-                }
-                launch {
                     viewModel.scanResult.collect { result ->
                         if (!isBindingActive()) return@collect
                         result?.let {
@@ -263,25 +230,6 @@ class ScannerFragment : Fragment() {
             }
         }
     }
-
-    private fun updateTopBar(rate: Double?) {
-        if (!isBindingActive()) return
-        binding.tvSelectedCurrency.text = getString(
-            R.string.scanner_selected_currency,
-            selectedCurrency
-        )
-        binding.tvRateInfo.text = if (rate != null) {
-            getString(R.string.scanner_rate_info, selectedCurrency, "%.4f".format(rate))
-        } else {
-            ""
-        }
-        binding.topBar.contentDescription = getString(
-            R.string.scanner_rate_info,
-            selectedCurrency,
-            rate?.let { "%.4f".format(it) } ?: "—"
-        )
-    }
-
     private fun showResultCard(result: com.przevolut.domain.model.ScanResult) {
         if (!isBindingActive()) return
         binding.cardResult.visibility = View.VISIBLE
