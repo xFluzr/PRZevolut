@@ -31,6 +31,7 @@
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │                    API Routes                        │  │
 │  │  /auth    /rates    /alerts    /devices    /health   │  │
+│  │  (/me, /password)  (/history, /{currency})           │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                           │                                │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐  │
@@ -95,15 +96,17 @@
 - CORS konfigurowany z ENV
 
 ### Services
-- **nbp_client**: `httpx` async, pobiera tabelę A z api.nbp.pl
-- **rate_aggregator**: APScheduler scheduler, trigger co 60 min
-- **alert_engine**: iteruje aktywne alerty, sprawdza przekroczenie progu
+- **nbp_client**: `httpx` async, pobiera tabelę A z api.nbp.pl + historia dziennych notowań
+- **rate_aggregator**: APScheduler scheduler, trigger co 60 min (konfigurowalne przez `RATE_REFRESH_INTERVAL_MINUTES`)
+- **alert_engine**: iteruje aktywne alerty, sprawdza przekroczenie progu, wysyła FCM
 - **push_sender**: `firebase-admin` → FCM API
 
 ### Database
 - PostgreSQL (produkcja: Render.com managed DB)
 - SQLAlchemy 2.0 async (`asyncpg` driver)
-- Alembic dla migracji
+- Alembic dla migracji schematu
+- Modele: `User`, `Alert`, `Rate`, `RefreshToken`, `DeviceToken`
+- Rotacja refresh tokenów — przy każdym użyciu `/auth/refresh` stary token jest unieważzniany
 
 ---
 
@@ -138,7 +141,7 @@ ScannerScreen (Composable Canvas overlay)
 
 | Warstwa | Technologia |
 |---------|-------------|
-| Android | Kotlin 1.9+, Jetpack Compose, Material 3 |
+| Android | Kotlin 2.0, Jetpack Compose, Material 3 |
 | DI | Hilt |
 | Database (mobile) | Room 2.6 |
 | Sieć (mobile) | Retrofit 2 + OkHttp + kotlinx.serialization |
@@ -146,13 +149,16 @@ ScannerScreen (Composable Canvas overlay)
 | Kamera | CameraX |
 | Async | Coroutines + Flow |
 | Powiadomienia | FCM (Firebase Cloud Messaging) |
-| Ustawienia | DataStore |
+| Ustawienia | DataStore Preferences |
 | Tło | WorkManager |
+| Bezpieczeństwo (mobile) | BiometricPrompt, EncryptedSharedPreferences, Android Keystore |
 | Backend | FastAPI + Python 3.12 |
 | ORM | SQLAlchemy 2.0 async |
-| DB | PostgreSQL |
+| DB | PostgreSQL (produkcja) / SQLite (testy) |
 | Scheduler | APScheduler |
 | Push | firebase-admin (FCM) |
-| Kursy | api.nbp.pl (darmowe, publiczne) |
+| Kursy | api.nbp.pl (darmowe, publiczne, Tabela A) |
+| Rate limiting | slowapi |
 | CI/CD | GitHub Actions |
 | Hosting | Render.com |
+| Konteneryzacja | Docker + Docker Compose |

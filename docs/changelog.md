@@ -10,22 +10,22 @@ Projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 ## [Unreleased]
 
 ### Dodano
-- Docker Compose (PostgreSQL + backend)
-- Clean Architecture w Android (Repository, UseCases, AR overlay)
-- Testy jednostkowe i integracyjne (Android + backend)
-
-### Zmieniono
-- Ujednolicono strukturę backendu (usunięto legacy warstwę sync API)
-- Scalono dokumentację i workflow CI
+- Endpoint `GET /auth/me` — profil zalogowanego użytkownika
+- Endpoint `PATCH /auth/password` — zmiana hasła po walidacji aktualnego
+- Endpoint `GET /rates/{currency}` — aktualny kurs pojedynczej waluty
+- Rotacja refresh tokenów przy każdym użyciu `POST /auth/refresh`
+- Domyślna wartość `days=14` w `/rates/history` (zakres 1–365)
 
 ### Planowane
 - Rozpoznawanie paragonów (multi-line OCR)
-- Widget ekranu głównego z aktualnym kursem EUR/PLN
-- Tryb ciemny / jasny
+- Widget ekranu głównego z aktualnym kursem EUR/PLN (Glance API)
+- Tryb ciemny / jasny (manualne przełączanie motywu)
+- Eksport historii kursów do CSV
+- WebSocket — live rates stream
 
 ---
 
-## [1.0.0] — 2026-06-XX — MVP Release 🚀
+## [1.0.0] — 2026-06-14 — MVP Release 🚀
 
 ### Dodano
 - Ekran skanera AR z nakładką przeliczonej ceny (CameraX + ML Kit OCR)
@@ -48,7 +48,7 @@ Projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 
 ---
 
-## [0.2.0] — 2026-05-XX — Sprint 2
+## [0.2.0] — 2026-05-28 — Sprint 2
 
 ### Dodano
 - Alerty walutowe (UI + backend)
@@ -64,7 +64,7 @@ Projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 
 ---
 
-## [0.1.0] — 2026-05-XX — Sprint 1 / MVP Core
+## [0.1.0] — 2026-05-14 — Sprint 1 / MVP Core
 
 ### Dodano
 - Inicjalizacja projektu (monorepo: android/ + backend/)

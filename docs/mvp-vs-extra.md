@@ -6,34 +6,37 @@ Funkcje, które **muszą działać** aby aplikacja spełniała swój cel i zalic
 
 ### Android MVP
 
-| Funkcja | Priorytet | Status |
-|---------|-----------|--------|
-| ScannerScreen z CameraX + ML Kit OCR | 🔴 KRYTYCZNE | MVP |
-| Nakładka AR z przeliczoną ceną (Canvas) | 🔴 KRYTYCZNE | MVP |
-| ManualConverterScreen | 🔴 KRYTYCZNE | MVP |
-| Room: cached_rates (offline-first) | 🔴 KRYTYCZNE | MVP |
-| NetworkMonitor + baner offline | 🔴 KRYTYCZNE | MVP |
-| AuthScreen (login + rejestracja) | 🟠 WAŻNE | MVP |
-| JWT + EncryptedSharedPreferences | 🟠 WAŻNE | MVP |
-| AlertsListScreen + AlertEditScreen | 🟠 WAŻNE | MVP |
-| SettingsScreen (waluta domyślna) | 🟠 WAŻNE | MVP |
-| BiometricPrompt | 🟠 WAŻNE | MVP |
-| WorkManager (codzienny refresh) | 🟡 POTRZEBNE | MVP |
-| FCM powiadomienia push | 🟡 POTRZEBNE | MVP |
+| Funkcja | Priorytet | Status | Zaimplementowano |
+|---------|-----------|--------|------------------|
+| ScannerScreen z CameraX + ML Kit OCR | 🔴 KRYTYCZNE | MVP | ✅ |
+| Nakładka AR z przeliczoną ceną (Canvas) | 🔴 KRYTYCZNE | MVP | ✅ |
+| ManualConverterScreen | 🔴 KRYTYCZNE | MVP | ✅ |
+| Room: cached_rates (offline-first) | 🔴 KRYTYCZNE | MVP | ✅ |
+| NetworkMonitor + baner offline | 🔴 KRYTYCZNE | MVP | ✅ |
+| AuthScreen (login + rejestracja) | 🟠 WAŻNE | MVP | ✅ |
+| JWT + EncryptedSharedPreferences | 🟠 WAŻNE | MVP | ✅ |
+| AlertsListScreen + AlertEditScreen | 🟠 WAŻNE | MVP | ✅ |
+| SettingsScreen (waluta domyślna) | 🟠 WAŻNE | MVP | ✅ |
+| BiometricPrompt | 🟠 WAŻNE | MVP | ✅ |
+| WorkManager (codzienny refresh) | 🟡 POTRZEBNE | MVP | ✅ |
+| FCM powiadomienia push | 🟡 POTRZEBNE | MVP | ✅ |
 
 ### Backend MVP
 
-| Funkcja | Priorytet | Status |
-|---------|-----------|--------|
-| POST /auth/register, /auth/login | 🔴 KRYTYCZNE | MVP |
-| GET /rates (z NBP) | 🔴 KRYTYCZNE | MVP |
-| APScheduler — agregator NBP | 🔴 KRYTYCZNE | MVP |
-| CRUD /alerts | 🟠 WAŻNE | MVP |
-| Silnik alertów + FCM push | 🟡 POTRZEBNE | MVP |
-| GET /rates/history | 🟡 POTRZEBNE | MVP |
-| POST /auth/refresh (rotacja tokenów) | 🟡 POTRZEBNE | MVP |
-| POST /devices/register | 🟡 POTRZEBNE | MVP |
-| GET /health | 🟢 PROSTE | MVP |
+| Funkcja | Priorytet | Status | Zaimplementowano |
+|---------|-----------|--------|------------------|
+| POST /auth/register, /auth/login | 🔴 KRYTYCZNE | MVP | ✅ |
+| GET /auth/me | 🔴 KRYTYCZNE | MVP | ✅ |
+| PATCH /auth/password | 🟠 WAŻNE | MVP | ✅ |
+| GET /rates (z NBP) | 🔴 KRYTYCZNE | MVP | ✅ |
+| GET /rates/{currency} | 🟡 POTRZEBNE | MVP | ✅ |
+| APScheduler — agregator NBP | 🔴 KRYTYCZNE | MVP | ✅ |
+| CRUD /alerts | 🟠 WAŻNE | MVP | ✅ |
+| Silnik alertów + FCM push | 🟡 POTRZEBNE | MVP | ✅ |
+| GET /rates/history | 🟡 POTRZEBNE | MVP | ✅ |
+| POST /auth/refresh (rotacja tokenów) | 🟡 POTRZEBNE | MVP | ✅ |
+| POST /devices/register | 🟡 POTRZEBNE | MVP | ✅ |
+| GET /health | 🟢 PROSTE | MVP | ✅ |
 
 ---
 

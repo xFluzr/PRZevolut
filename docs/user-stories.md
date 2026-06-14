@@ -1,6 +1,6 @@
 # User Stories — PRZevolut
 
-Wersja: 1.0.0 | Data: 2024-01-01
+Wersja: 1.0.0 | Data: 2026-06-14
 
 ---
 
@@ -306,6 +306,27 @@ When klikam "Odśwież kursy teraz"
 Then aplikacja wywołuje GET /rates z nagłówkiem Cache-Control: no-cache
   And Room jest aktualizowany
   And widzę komunikat "Kursy zaktualizowane: [timestamp]"
+```
+
+---
+
+## US-18: Zmiana hasła z poziomu aplikacji
+
+**Jako** zalogowany użytkownik  
+**Chcę** zmienić swoje hasło podając aktualne i nowe  
+**Aby** zachować bezpieczeństwo konta w razie podejrzenia kradzieży danych
+
+**Kryteria akceptacji (Gherkin):**
+```gherkin
+Given jestem zalogowany i jestem w Ustawieniach
+When wybieram "Zmień hasło"
+  And wpisuję aktualne hasło i nowe hasło (min. 8 znaków)
+  And klikam "Zapisz"
+Then aplikacja wywołuje PATCH /auth/password → 204
+  And hasło jest zaktualizowane w bazie jako nowy hash bcrypt
+When wpisuję niepoprawne aktualne hasło
+Then wyświetla się komunikat "Aktualne hasło jest nieprawidłowe"
+  And hasło nie zostaje zmienione
 ```
 
 ---

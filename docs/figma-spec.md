@@ -152,6 +152,7 @@
 
 3. **Sekcja "Bezpieczeństwo":**
    - `ListItem` "Biometria" + `Switch`
+   - `ListItem` "Zmień hasło" → dialog z polami: aktualne hasło, nowe hasło, powtórz
 
 4. **Sekcja "Konto":**
    - `ListItem` "Zalogowany jako: user@example.com"
@@ -160,6 +161,34 @@
 5. **Sekcja "Informacje":**
    - Wersja aplikacji: "PRZevolut v1.0.0"
    - Link: "Polityka prywatności"
+
+---
+
+## Ekran 7: HistoryScreen
+
+**Opis:** Historia kursu wybranej waluty (dane z `GET /rates/history`)
+
+### Elementy UI:
+1. **TopAppBar:** "Historia kursów"
+
+2. **Chip wyboru waluty** (EUR, USD, GBP, CHF, CZK)
+
+3. **Chip wyboru okresu:** `[7 dni | 14 dni | 30 dni]` (SegmentedButton)
+
+4. **Wykres liniowy (Compose Canvas lub MPAndroidChart):**
+   - Oś X: daty, oś Y: kurs PLN
+   - Punkt dotknięcia: tooltip z datą i wartością
+   - Kolor linii: Primary `#1565C0`
+
+5. **Lista poniżej wykresu (LazyColumn):**
+   ```
+   ┌────────────────────────────────────────┐
+   │ 2026-06-14 (pon)         4,312 PLN │
+   │ 2026-06-13 (ndz)         4,295 PLN │
+   └────────────────────────────────────────┘
+   ```
+
+### Stany: Loading | Success | Error | Empty
 
 ---
 
@@ -173,6 +202,7 @@ BottomNavigation:
     ├── ScannerScreen (ikona: kamera)
     ├── ManualConverterScreen (ikona: ⇌)
     ├── AlertsListScreen (ikona: dzwonek)
+    ├── HistoryScreen (ikona: wykres) → [nowy ekran]
     └── SettingsScreen (ikona: koła)
                 │
                 ▼

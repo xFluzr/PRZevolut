@@ -1,6 +1,7 @@
 # API Overview — PRZevolut Backend
 
 Wersja API: **v1**  
+Data aktualizacji: **2026-06-14**  
 Base URL (produkcja): `https://przevolut.onrender.com`  
 Base URL (lokalnie): `http://10.0.2.2:8000` (Android Emulator) | `http://localhost:8000`  
 Dokumentacja interaktywna: `GET /docs` (Swagger UI) | `GET /redoc` (ReDoc)
@@ -27,10 +28,12 @@ Authorization: Bearer <access_token>
 
 | Metoda | Ścieżka | Auth | Opis |
 |--------|---------|------|------|
-| POST | `/auth/register` | — | Rejestracja (email + hasło ≥ 8 znaków) |
+| POST | `/auth/register` | — | Rejestracja (email + hasło ≥ 8 znaków) → para tokenów JWT |
 | POST | `/auth/login` | — | Logowanie → access_token + refresh_token |
-| POST | `/auth/refresh` | refresh_token | Odświeżenie access tokena |
+| POST | `/auth/refresh` | refresh_token | Rotacja refresh tokena → nowy access_token |
 | POST | `/auth/logout` | JWT | Unieważnienie refresh tokena |
+| GET | `/auth/me` | JWT | Profil zalogowanego użytkownika |
+| PATCH | `/auth/password` | JWT | Zmiana hasła (wymaga podania aktualnego hasła) |
 
 **Przykład rejestracji:**
 ```bash
@@ -53,8 +56,13 @@ curl -X POST https://przevolut.onrender.com/auth/login \
 
 | Metoda | Ścieżka | Auth | Opis |
 |--------|---------|------|------|
-| GET | `/rates` | JWT | Aktualne kursy (PLN base) ze wszystkich walut |
-| GET | `/rates/history` | JWT | Historia kursu: `?code=EUR&days=30` |
+| GET | `/rates` | JWT | Aktualne kursy (PLN base) — ostatni snapshot NBP |
+| GET | `/rates/history` | JWT | Historia kursu: `?code=EUR&days=14` (1–365 dni roboczych) |
+| GET | `/rates/{currency}` | JWT | Aktualny kurs pojedynczej waluty (np. `/rates/EUR`) |
+
+**Parametry `/rates/history`:**
+- `code` (wymagany) — kod ISO 4217, np. `EUR`, `USD`, `GBP`
+- `days` (opcjonalny, domyślnie: 14, max: 365) — liczba dni roboczych historii
 
 **Przykład odpowiedzi `/rates`:**
 ```json
@@ -97,13 +105,26 @@ curl -X POST https://przevolut.onrender.com/auth/login \
 
 | Metoda | Ścieżka | Auth | Opis |
 |--------|---------|------|------|
-| POST | `/devices/register` | JWT | Rejestracja tokena FCM urządzenia |
+| POST | `/devices/register` | JWT | Rejestracja/aktualizacja tokena FCM urządzenia |
+
+> **Uwaga:** Jeśli token FCM już istnieje w bazie, endpoint aktualizuje powiązanego użytkownika — nie tworzy duplikatu.
 
 **Body:**
 ```json
 {
   "fcm_token": "dGVzdF90b2tlbl8xMjM...",
   "platform": "android"
+}
+```
+
+**Odpowiedź (201 Created):**
+```json
+{
+  "id": 1,
+  "user_id": 42,
+  "fcm_token": "dGVzdF90b2tlbl8xMjM...",
+  "platform": "android",
+  "created_at": "2026-06-14T10:00:00Z"
 }
 ```
 
@@ -124,16 +145,16 @@ curl -X POST https://przevolut.onrender.com/auth/login \
 
 ## Kody błędów
 
-| Kod | Opis |
-|-----|------|
-| 400 | Błędne dane wejściowe (walidacja Pydantic) |
-| 401 | Brak lub nieważny token |
-| 403 | Brak uprawnień (np. edycja cudzego alertu) |
-| 404 | Zasób nie istnieje |
-| 409 | Konflikt (np. email już zarejestrowany) |
-| 422 | Błąd walidacji (szczegóły w body) |
-| 429 | Rate limit przekroczony (dotyczy /auth/*) |
-| 500 | Błąd serwera |
+| Kod | Opis | Przykład |
+|-----|------|----------|
+| 400 | Błędne dane wejściowe | Brakujące pole w body |
+| 401 | Brak lub nieważny token | Wygasły access_token |
+| 403 | Brak uprawnień | Edycja cudzego alertu |
+| 404 | Zasób nie istnieje | Alert o podanym ID nie istnieje |
+| 409 | Konflikt | E-mail już zarejestrowany |
+| 422 | Błąd walidacji Pydantic | Hasło krótsze niż 8 znaków |
+| 429 | Rate limit przekroczony | Zbyt wiele żądań do /auth/* |
+| 500 | Błąd serwera | Błąd bazy danych |
 
 ---
 

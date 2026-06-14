@@ -1,6 +1,6 @@
 # Polityka Prywatności — PRZevolut
 
-**Data ostatniej aktualizacji:** 2024-01-15  
+**Data ostatniej aktualizacji:** 2026-06-14  
 **Aplikacja:** PRZevolut — Walutowy Skaner AR  
 **Deweloper:** Zespół PRZevolut (projekt akademicki)  
 **Kontakt:** privacy@przevolut.app
@@ -64,9 +64,9 @@ Niniejsza Polityka Prywatności opisuje, w jaki sposób aplikacja PRZevolut zbie
 ## 6. Twoje prawa (RODO)
 
 Zgodnie z Rozporządzeniem RODO przysługuje Ci prawo do:
-- **Dostępu** do swoich danych (GET /users/me)
+- **Dostępu** do swoich danych — `GET /auth/me` (imię, e-mail, data rejestracji)
 - **Sprostowania** danych
-- **Usunięcia** konta i wszystkich powiązanych danych
+- **Usunięcia** konta i wszystkich powiązanych danych (alerty, tokeny FCM, refresh tokeny)
 - **Przenoszenia** danych
 - **Wycofania zgody** w dowolnym momencie
 
