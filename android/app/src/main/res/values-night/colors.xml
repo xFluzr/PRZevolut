@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#90CAF9</color>
+    <color name="primary_dark">#1565C0</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="on_primary">#003258</color>
+    <color name="primary_container">#004A77</color>
+    <color name="on_primary_container">#D1E4FF</color>
+
+    <color name="secondary">#4DD0E1</color>
+    <color name="secondary_dark">#00ACC1</color>
+    <color name="on_secondary">#00363D</color>
+    <color name="secondary_container">#004F58</color>
+    <color name="on_secondary_container">#B2EBF2</color>
+
+    <color name="tertiary">#CE93D8</color>
+    <color name="on_tertiary">#3E004F</color>
+    <color name="tertiary_container">#5C1A6E</color>
+    <color name="on_tertiary_container">#F3E5F5</color>
+
+    <color name="background">#121218</color>
+    <color name="surface">#1E1E2A</color>
+    <color name="surface_variant">#2A2A38</color>
+    <color name="on_surface">#E8EAF0</color>
+    <color name="on_surface_variant">#A8B0BC</color>
+    <color name="outline">#4A5060</color>
+
+    <color name="success">#66BB6A</color>
+    <color name="error">#EF5350</color>
+    <color name="warning">#FFB74D</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#93000A</color>
+    <color name="on_error_container">#FFDAD6</color>
+
+    <color name="trend_up">#69F0AE</color>
+    <color name="trend_down">#FF5252</color>
+
+    <color name="currency_eur">#64B5F6</color>
+    <color name="currency_usd">#81C784</color>
+    <color name="currency_gbp">#BA68C8</color>
+    <color name="currency_chf">#FFB74D</color>
+    <color name="currency_czk">#4DD0E1</color>
+
+    <color name="overlay_background">#CC000000</color>
+    <color name="overlay_scrim">#AA000000</color>
+    <color name="overlay_text">#FFFFFF</color>
+    <color name="overlay_accent">#FFD700</color>
+    <color name="scanner_reticle">#00E676</color>
+
+    <color name="offline_banner">#E65100</color>
+    <color name="on_offline_banner">#FFFFFF</color>
+
+    <color name="alert_active">#66BB6A</color>
+    <color name="alert_triggered">#EF5350</color>
+    <color name="alert_inactive">#757575</color>
+
+    <color name="text_dimmed">#9E9E9E</color>
+    <color name="frosted_glass">#B31E1E2A</color>
+    <color name="scanner_background">#000000</color>
+
+    <!-- Login screen — ciemny motyw -->
+    <color name="login_bg_top">#050B14</color>
+    <color name="login_bg_mid">#0A1929</color>
+    <color name="login_bg_bottom">#132F4C</color>
+    <color name="login_glow">#331976D2</color>
+    <color name="login_hero_text">#E8EAF0</color>
+    <color name="login_hero_subtext">#99A8B8</color>
+    <color name="login_badge_bg">#1A2438</color>
+    <color name="login_divider">#3364B5F6</color>
+    <color name="login_logo_glow_start">#401565C0</color>
+    <color name="login_logo_glow_end">#4000BCD4</color>
+</resources>

@@ -4,66 +4,203 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@color/scanner_background">
 
-    <!-- Podgląd kamery -->
     <androidx.camera.view.PreviewView
         android:id="@+id/preview_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:contentDescription="@string/cd_camera_preview" />
 
-    <!-- Komunikat o braku uprawnień -->
-    <TextView
-        android:id="@+id/tv_permission_message"
-        android:layout_width="wrap_content"
+    <com.przevolut.ui.scanner.ArOverlayView
+        android:id="@+id/ar_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/scanner_permission_message"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:background="@drawable/bg_scanner_top_bar"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/scanner_top_bar_height"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_md"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_selected_currency"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="@color/overlay_text" />
+
+        <TextView
+            android:id="@+id/tv_rate_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/overlay_text" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_permission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_scanner_result_card"
         android:gravity="center"
-        android:padding="24dp"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_xl"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Nakładka AR z wynikiem przeliczenia -->
-    <TextView
-        android:id="@+id/tv_overlay_result"
+        <TextView
+            android:id="@+id/tv_permission_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityLiveRegion="assertive"
+            android:gravity="center"
+            android:text="@string/scanner_permission_message"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retry_permission"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/btn_retry_permission" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/card_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_md"
+        android:accessibilityLiveRegion="polite"
+        android:background="@drawable/bg_scanner_result_card"
+        android:contentDescription="@string/cd_scanner_result"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_lg"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/chip_group_currency"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_detected_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no"
+            android:textAppearance="?attr/textAppearanceHeadlineLarge"
+            android:textColor="?attr/colorOnSurface" />
+
+        <ImageView
+            android:id="@+id/iv_arrow"
+            android:layout_width="@dimen/icon_size_md"
+            android:layout_height="@dimen/icon_size_md"
+            android:layout_margin="@dimen/spacing_sm"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_arrow_downward"
+            app:tint="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:id="@+id/tv_converted_pln"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no"
+            android:textAppearance="?attr/textAppearanceDisplaySmall"
+            android:textColor="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/tv_used_rate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:importantForAccessibility="no"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+    </LinearLayout>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_currency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/overlay_background"
-        android:textColor="@color/overlay_accent"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:padding="16dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/tv_rate_info"
+        android:layout_marginBottom="@dimen/spacing_md"
+        android:contentDescription="@string/cd_currency_chips"
+        app:layout_constraintBottom_toTopOf="@id/fab_manual_input"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:selectionRequired="true"
+        app:singleSelection="true">
 
-    <!-- Informacja o kursie -->
-    <TextView
-        android:id="@+id/tv_rate_info"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_eur"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="EUR" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_usd"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="USD" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_gbp"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="GBP" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_chf"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="CHF" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_czk"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/chip_min_height"
+            android:text="CZK" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_manual_input"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/overlay_background"
-        android:textColor="#CCFFFFFF"
-        android:textSize="12sp"
-        android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/btn_manual_input"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Przycisk ręcznego wpisania -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_manual_input"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_lg"
+        android:contentDescription="@string/cd_manual_input_fab"
+        android:minHeight="@dimen/touch_target_min"
         android:text="@string/btn_manual_input"
-        android:layout_margin="24dp"
+        app:icon="@drawable/ic_edit"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

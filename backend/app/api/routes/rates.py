@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, get_db
 from app.models import Rate, User
 from app.schemas import RateHistoryItem, RateHistoryResponse, RateItem, RatesResponse
+from app.services.nbp_client import fetch_nbp_rate_history
 
 router = APIRouter(prefix="/rates", tags=["rates"])
 
@@ -54,22 +55,47 @@ async def get_rates(
 )
 async def get_rate_history(
     code: str = Query(min_length=3, max_length=3, description="Kod ISO waluty, np. EUR"),
-    days: int = Query(default=30, ge=1, le=365, description="Liczba dni historii"),
+    days: int = Query(default=14, ge=1, le=365, description="Liczba dni roboczych historii"),
     db: AsyncSession = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ) -> RateHistoryResponse:
-    """Zwraca historię kursu podanej waluty z ostatnich N dni."""
-    since = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+    """Zwraca historię dziennych notowań z NBP (ostatnie N dni roboczych)."""
+    currency = code.upper()
+    nbp_history = await fetch_nbp_rate_history(currency, days)
 
+    if nbp_history:
+        return RateHistoryResponse(
+            code=currency,
+            days=days,
+            history=[
+                RateHistoryItem(rate=p.rate_to_pln, fetched_at=p.effective_date)
+                for p in nbp_history
+            ],
+        )
+
+    since = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
     result = await db.execute(
         select(Rate)
-        .where(Rate.code == code.upper(), Rate.fetched_at >= since)
-        .order_by(Rate.fetched_at.desc())
+        .where(Rate.code == currency, Rate.fetched_at >= since)
+        .order_by(Rate.fetched_at.asc())
     )
     rates = result.scalars().all()
 
+    # Agreguj snapshoty godzinowe do jednego punktu na dzień
+    daily: dict[datetime.date, Rate] = {}
+    for rate in rates:
+        daily[rate.fetched_at.date()] = rate
+
     return RateHistoryResponse(
-        code=code.upper(),
+        code=currency,
         days=days,
-        history=[RateHistoryItem(rate=r.rate_to_pln, fetched_at=r.fetched_at) for r in rates],
+        history=[
+            RateHistoryItem(
+                rate=r.rate_to_pln,
+                fetched_at=datetime.datetime.combine(
+                    day, datetime.time(12, 0), tzinfo=datetime.timezone.utc
+                ),
+            )
+            for day, r in sorted(daily.items())
+        ][-days:],
     )

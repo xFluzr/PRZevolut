@@ -1,5 +1,16 @@
 import java.util.Properties
 
+fun normalizeBaseUrl(raw: String): String {
+    var url = raw.trim().trim('"')
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "http://$url"
+    }
+    if (!url.endsWith("/")) {
+        url = "$url/"
+    }
+    return url
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -30,7 +41,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        val baseUrl = localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com").trim('"')
+        val baseUrl = normalizeBaseUrl(
+            localProperties.getProperty("BASE_URL", "https://przevolut.onrender.com")
+        )
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
@@ -138,10 +151,16 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.analytics)
 
+    // Charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
     // Testing
     testImplementation(libs.bundles.testing)
     androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)

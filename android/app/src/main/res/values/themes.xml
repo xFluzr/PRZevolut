@@ -1,14 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.PRZevolut" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Primary brand color. -->
+    <style name="Theme.PRZevolut" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/on_primary</item>
-        <!-- Secondary brand color. -->
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/on_primary_container</item>
+
         <item name="colorSecondary">@color/secondary</item>
-        <item name="colorOnSecondary">@color/on_primary</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <!-- Customize your theme here. -->
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/on_secondary_container</item>
+
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/on_tertiary_container</item>
+
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        <item name="colorOutline">@color/outline</item>
+
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+        <item name="colorErrorContainer">@color/error_container</item>
+        <item name="colorOnErrorContainer">@color/on_error_container</item>
+
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.PRZevolut.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.PRZevolut.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.PRZevolut.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.PRZevolut.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.PRZevolut.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.PRZevolut.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.PRZevolut.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.PRZevolut.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.PRZevolut.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.PRZevolut.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.PRZevolut.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.PRZevolut.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.PRZevolut.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.PRZevolut.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.PRZevolut.LabelSmall</item>
+
+        <item name="bottomNavigationStyle">@style/Widget.PRZevolut.BottomNavigationView</item>
+        <item name="materialCardViewStyle">@style/Widget.PRZevolut.CardView</item>
+    </style>
+
+    <style name="Widget.PRZevolut.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:minHeight">@dimen/bottom_nav_height</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemIconTint">@color/bottom_nav_item_color</item>
+        <item name="itemTextColor">@color/bottom_nav_item_color</item>
+        <item name="android:background">?attr/colorSurface</item>
+    </style>
+
+    <style name="Widget.PRZevolut.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+    </style>
+
+    <style name="TextAppearance.PRZevolut.DisplayLarge" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="fontFamily">@font/inter_bold</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.DisplayMedium" parent="TextAppearance.Material3.DisplayMedium">
+        <item name="fontFamily">@font/inter_bold</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="fontFamily">@font/inter_bold</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="fontFamily">@font/inter_bold</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">@font/inter</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="fontFamily">@font/inter</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="fontFamily">@font/inter</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+    <style name="TextAppearance.PRZevolut.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">@font/inter</item>
     </style>
 </resources>

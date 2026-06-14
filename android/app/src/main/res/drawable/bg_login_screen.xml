@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:centerColor="@color/login_bg_mid"
+                android:endColor="@color/login_bg_bottom"
+                android:startColor="@color/login_bg_top"
+                android:type="linear" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|end"
+        android:width="@dimen/login_glow_size"
+        android:height="@dimen/login_glow_size">
+        <shape android:shape="oval">
+            <solid android:color="@color/login_glow" />
+        </shape>
+    </item>
+    <item
+        android:gravity="bottom|start"
+        android:width="@dimen/spacing_xxl"
+        android:height="@dimen/spacing_xxl"
+        android:bottom="@dimen/spacing_xxl"
+        android:left="@dimen/spacing_lg">
+        <shape android:shape="oval">
+            <solid android:color="@color/login_badge_bg" />
+        </shape>
+    </item>
+</layer-list>

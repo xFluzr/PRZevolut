@@ -9,6 +9,15 @@ Projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+### Dodano
+- Docker Compose (PostgreSQL + backend)
+- Clean Architecture w Android (Repository, UseCases, AR overlay)
+- Testy jednostkowe i integracyjne (Android + backend)
+
+### Zmieniono
+- Ujednolicono strukturę backendu (usunięto legacy warstwę sync API)
+- Scalono dokumentację i workflow CI
+
 ### Planowane
 - Rozpoznawanie paragonów (multi-line OCR)
 - Widget ekranu głównego z aktualnym kursem EUR/PLN

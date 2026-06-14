@@ -4,7 +4,29 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,54m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0" />
+
+    <!-- PRZevolut logo centered in adaptive icon safe zone (33dp margins) -->
+    <!-- Original logo viewport 64x64, scaled to fit ~42x42dp centered at 54,54 -->
+    <!-- Scale factor: 42/64 = 0.656, offset: 54 - 32*0.656 = 33.0 -->
+    <group
+        android:translateX="33"
+        android:translateY="33"
+        android:scaleX="0.656"
+        android:scaleY="0.656">
+
+        <!-- Dark blue card background -->
+        <path
+            android:fillColor="#1565C0"
+            android:pathData="M12,6h40c3.3,0 6,2.7 6,6v40c0,3.3 -2.7,6 -6,6H12c-3.3,0 -6,-2.7 -6,-6V12c0,-3.3 2.7,-6 6,-6z" />
+
+        <!-- Cyan accent corner -->
+        <path
+            android:fillColor="#00BCD4"
+            android:pathData="M44,6h8c3.3,0 6,2.7 6,6v14H44V6z" />
+
+        <!-- White P+R lettermark -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M21,17h7v30h-7zM28,17h10.5c6.9,0 12.5,5.6 12.5,12.5S45.4,42 38.5,42H28V17zM34,23v18h4.5c3.6,0 6.5,-2.9 6.5,-6.5S42.1,28 38.5,28H34z" />
+    </group>
 </vector>

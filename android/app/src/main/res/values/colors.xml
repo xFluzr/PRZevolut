@@ -1,30 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary brand colors -->
+    <!-- Primary -->
     <color name="primary">#1565C0</color>
-    <color name="primary_dark">#003c8f</color>
-    <color name="primary_light">#5e92f3</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="primary_light">#42A5F5</color>
     <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#D1E4FF</color>
+    <color name="on_primary_container">#001D36</color>
 
     <!-- Secondary -->
     <color name="secondary">#00BCD4</color>
-    <color name="secondary_dark">#0097a7</color>
+    <color name="secondary_dark">#0097A7</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="secondary_container">#B2EBF2</color>
+    <color name="on_secondary_container">#004D57</color>
 
-    <!-- Background -->
+    <!-- Tertiary -->
+    <color name="tertiary">#6A1B9A</color>
+    <color name="on_tertiary">#FFFFFF</color>
+    <color name="tertiary_container">#F3E5F5</color>
+    <color name="on_tertiary_container">#4A148C</color>
+
+    <!-- Surface -->
     <color name="background">#F5F7FA</color>
     <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#E8EDF2</color>
     <color name="on_surface">#1A1A2E</color>
+    <color name="on_surface_variant">#5C6370</color>
+    <color name="outline">#C5CBD3</color>
 
-    <!-- Status colors -->
+    <!-- Semantic -->
     <color name="success">#2E7D32</color>
     <color name="error">#C62828</color>
     <color name="warning">#F57F17</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#FFDAD6</color>
+    <color name="on_error_container">#410002</color>
 
-    <!-- Scanner overlay -->
+    <!-- Trends -->
+    <color name="trend_up">#00C853</color>
+    <color name="trend_down">#D50000</color>
+
+    <!-- Currency accents -->
+    <color name="currency_eur">#1565C0</color>
+    <color name="currency_usd">#2E7D32</color>
+    <color name="currency_gbp">#6A1B9A</color>
+    <color name="currency_chf">#E65100</color>
+    <color name="currency_czk">#00838F</color>
+
+    <!-- Scanner -->
     <color name="overlay_background">#CC000000</color>
+    <color name="overlay_scrim">#AA000000</color>
     <color name="overlay_text">#FFFFFF</color>
     <color name="overlay_accent">#FFD700</color>
+    <color name="scanner_reticle">#00E676</color>
 
-    <!-- Offline banner -->
+    <!-- Offline -->
     <color name="offline_banner">#FF6F00</color>
+    <color name="on_offline_banner">#FFFFFF</color>
+
+    <!-- Alert status -->
+    <color name="alert_active">#2E7D32</color>
+    <color name="alert_triggered">#C62828</color>
+    <color name="alert_inactive">#9E9E9E</color>
+
+    <!-- Misc -->
+    <color name="text_dimmed">#888888</color>
+    <color name="frosted_glass">#B3FFFFFF</color>
+    <color name="scanner_background">#000000</color>
+
+    <!-- Login screen — jasny motyw: jasne tło, ciemny tekst -->
+    <color name="login_bg_top">#F4F7FC</color>
+    <color name="login_bg_mid">#E8EFF8</color>
+    <color name="login_bg_bottom">#D9E6F5</color>
+    <color name="login_glow">#261565C0</color>
+    <color name="login_hero_text">#0D2137</color>
+    <color name="login_hero_subtext">#5C6370</color>
+    <color name="login_badge_bg">#FFFFFF</color>
+    <color name="login_divider">#331565C0</color>
+    <color name="login_logo_glow_start">#331565C0</color>
+    <color name="login_logo_glow_end">#3300BCD4</color>
 </resources>
