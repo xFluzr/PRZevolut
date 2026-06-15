@@ -2,8 +2,6 @@
 
 ## Zakres MVP (Minimum Viable Product)
 
-Funkcje, które **muszą działać** aby aplikacja spełniała swój cel i zaliczała checklistę prowadzącego.
-
 ### Android MVP
 
 | Funkcja | Priorytet | Status | Zaimplementowano |
@@ -71,8 +69,3 @@ Funkcje wartościowe, ale **niebędące warunkiem działania MVP**.
 | Multi-source aggregation | Łączenie NBP + ECB + inne źródła |
 | A/B testing alerts | Testy różnych progów wyzwalania |
 
----
-
-## Zasada upraszczania
-
-> Jeśli w trakcie implementacji brakuje czasu — upraszczaj **alerty i push** (powiadomienie lokalne zamiast FCM, brak historii), ale **NIGDY nie upraszczaj skanera AR ani offline-first**. Te dwie funkcje są rdzeniem produktu i jedynym uzasadnieniem istnienia tej aplikacji jako aplikacji mobilnej.
