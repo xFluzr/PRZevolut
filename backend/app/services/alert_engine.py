@@ -1,4 +1,4 @@
-"""Silnik alertów — sprawdza przekroczenia progów i wysyła powiadomienia FCM."""
+﻿"""Silnik alertów — sprawdza przekroczenia progów i wysyła powiadomienia FCM."""
 
 import datetime
 import logging
@@ -17,9 +17,6 @@ logger = logging.getLogger(__name__)
 async def process_alerts(current_rates: list[NbpRate]) -> None:
     """
     Iteruje aktywne alerty i sprawdza czy próg został przekroczony.
-    Logika przekroczenia (nie samo bycie pod/nad progiem):
-      - direction="above": poprzedni kurs <= próg i aktualny > próg
-      - direction="below": poprzedni kurs >= próg i aktualny < próg
     """
     # Buduj słownik aktualnych kursów kod→wartość
     rates_map: dict[str, float] = {r.code: r.rate_to_pln for r in current_rates}

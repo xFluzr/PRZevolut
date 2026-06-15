@@ -1,4 +1,4 @@
-"""Endpointy autoryzacji — rejestracja, logowanie, refresh, wylogowanie."""
+﻿"""Endpointy autoryzacji — rejestracja, logowanie, refresh, wylogowanie."""
 
 import datetime
 
@@ -101,7 +101,7 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> To
     summary="Odświeżenie access tokena",
 )
 async def refresh_token(payload: RefreshRequest, db: AsyncSession = Depends(get_db)) -> AccessTokenResponse:
-    """Rotacja refresh tokena — unieważnia stary i tworzy nową parę."""
+    """Odświeżenie access tokena — unieważnia stary refresh token i generuje nowy access token"""
     result = await db.execute(
         select(RefreshToken).where(
             RefreshToken.token == payload.refresh_token,

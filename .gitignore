@@ -1,6 +1,7 @@
 # Powszechne
 .idea/
 .vscode/
+.vs/
 .DS_Store
 *.log
 *.zip
@@ -21,6 +22,7 @@ captures/
 .externalNativeBuild/
 .cxx/
 google-services.json
+*.jks
 
 # Python / Backend
 __pycache__/

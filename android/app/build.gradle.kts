@@ -1,4 +1,4 @@
-import java.util.Properties
+﻿import java.util.Properties
 
 fun normalizeBaseUrl(raw: String): String {
     var url = raw.trim().trim('"')
@@ -21,7 +21,6 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-// Odczyt keystore z local.properties (placeholdery — nie commituj prawdziwych wartości)
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) load(file.inputStream())

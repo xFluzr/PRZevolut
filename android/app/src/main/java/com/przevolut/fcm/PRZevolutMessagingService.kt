@@ -1,4 +1,4 @@
-package com.przevolut.fcm
+﻿package com.przevolut.fcm
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -24,7 +24,6 @@ class PRZevolutMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         Log.d("FCM_TOKEN", "Token: $token")
-        // TODO: wysłać token na backend, gdy będzie endpoint
     }
 
     private fun showNotification(title: String, body: String) {

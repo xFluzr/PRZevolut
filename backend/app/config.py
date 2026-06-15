@@ -1,4 +1,4 @@
-"""Konfiguracja aplikacji — pydantic-settings czyta zmienne środowiskowe."""
+﻿"""Konfiguracja aplikacji — pydantic-settings czyta zmienne środowiskowe."""
 
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://user:password@localhost:5432/przevolut"
 
     # JWT
-    secret_key: str = "CHANGE_ME_USE_OPENSSL_RAND_HEX_32"
+    secret_key: str
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 30
