@@ -29,14 +29,14 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.przevolut"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.przevolut.app"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        targetSdk = 35
+        versionCode = 4
+        versionName = "3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

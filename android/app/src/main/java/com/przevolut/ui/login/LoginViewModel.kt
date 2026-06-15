@@ -34,8 +34,10 @@ class LoginViewModel @Inject constructor(
             try {
                 val response = apiService.login(LoginRequest(email, password))
                 if (response.isSuccessful) {
-                    val token = response.body()?.accessToken ?: ""
+                    val body = response.body()
+                    val token = body?.accessToken ?: ""
                     tokenManager.saveToken(token)
+                    body?.refreshToken?.let { tokenManager.saveRefreshToken(it) }
                     tokenManager.saveUserEmail(email)
                     _uiState.value = LoginUiState.Success(token)
                 } else {

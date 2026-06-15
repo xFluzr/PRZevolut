@@ -159,7 +159,7 @@ class AlertsFragment : Fragment() {
             val initialCurrency = if (defaultCurrency in watched) defaultCurrency else watched.firstOrNull()
             if (initialCurrency != null) {
                 currencyChips.find { it.second == initialCurrency }?.first?.isChecked = true
-                selectedCurrencies.add(initialCurrency)
+                // Don't add manually — the setOnCheckedStateChangeListener already handles it
             }
             dialogBinding.toggleDirection.check(R.id.btn_above)
         }

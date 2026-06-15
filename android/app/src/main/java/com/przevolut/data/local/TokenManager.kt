@@ -19,6 +19,10 @@ class TokenManager @Inject constructor(
         }
     }
 
+    fun saveRefreshToken(token: String) = prefs.edit { putString(KEY_REFRESH_TOKEN, token) }
+
+    fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
+
     fun saveUserEmail(email: String) = prefs.edit { putString(KEY_EMAIL, email) }
 
     fun getToken(): String? = prefs.getString(KEY_TOKEN, null)
@@ -27,6 +31,7 @@ class TokenManager @Inject constructor(
 
     fun clearToken() = prefs.edit {
         remove(KEY_TOKEN)
+        remove(KEY_REFRESH_TOKEN)
         remove(KEY_EMAIL)
         remove(KEY_SESSION_ACTIVE)
     }
@@ -43,6 +48,7 @@ class TokenManager @Inject constructor(
 
     companion object {
         private const val KEY_TOKEN = "access_token"
+        private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEY_EMAIL = "user_email"
         private const val KEY_SESSION_ACTIVE = "session_active"
     }
